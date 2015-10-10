@@ -10,14 +10,8 @@ WebCLGLKernel = function(gl, source, header) {
 	
 	this.utils = new WebCLGLUtils(this.gl);
 	
-	this.ready = false;
+	this.in_values = [];
 	
-	this.in_values = []; //{value,type,name,idPointer} 
-	// type: 'buffer', 'buffer4' or 'float' (sampler R, sampler RGBA or uniform1f) 
-	// idPointer to: this.samplers or this.uniformsFloat (according to type)
-	
-	this.samplers = []; // {location,value}
-	this.uniformsFloat = []; // {location,value}
 	if(source != undefined) this.setKernelSource(source, header); 
 };
 
@@ -29,24 +23,31 @@ WebCLGLKernel = function(gl, source, header) {
 */
 WebCLGLKernel.prototype.setKernelSource = function(source, header) {
 	this.head =(header!=undefined)?header:''; 
-	this.in_values = [];
-	var argumentsSource = source.split(')')[0].split('(')[1].split(','); // "float* A","float* B", "float C", "float4* D"
+	this.in_values = [];//{value,type,name,idPointer} 
+	// value: argument value
+	// type: 'buffer_float4'(RGBA channels), 'buffer_float'(Red channel)
+	// name: argument name
+	// idPointer to: this.samplers or this.uniforms (according to type)
+	
+	var argumentsSource = source.split(')')[0].split('(')[1].split(','); // "float* A", "float* B", "float C", "float4* D"
 	//console.log(argumentsSource);
 	for(var n = 0, f = argumentsSource.length; n < f; n++) {
 		if(argumentsSource[n].match(/\*/gm) != null) {
 			if(argumentsSource[n].match(/float4/gm) != null) {
 				this.in_values[n] = {value:undefined,
-									type:'buffer4',
-									name:argumentsSource[n].split('*')[1].trim()};
-			} else {
+						type:'buffer_float4',
+						name:argumentsSource[n].split('*')[1].trim()};
+			} else if(argumentsSource[n].match(/float/gm) != null) {
 				this.in_values[n] = {value:undefined,
-									type:'buffer',
+									type:'buffer_float',
 									name:argumentsSource[n].split('*')[1].trim()};
 			}
 		} else {
-			this.in_values[n] = {value:undefined,
-								type:'float',
-								name:argumentsSource[n].split(' ')[1].trim()};
+			if(argumentsSource[n].match(/float/gm) != null) {
+				this.in_values[n] = {value:undefined,
+									type:'float',
+									name:argumentsSource[n].split(' ')[1].trim()};
+			}
 		}
 	}
 	//console.log(this.in_values);
@@ -55,7 +56,9 @@ WebCLGLKernel.prototype.setKernelSource = function(source, header) {
 	this.source = source.replace(/\r\n/gi, '').replace(/\r/gi, '').replace(/\n/gi, '');
 	this.source = this.source.replace(/^\w* \w*\([\w\s\*,]*\) {/gi, '').replace(/}(\s|\t)*$/gi, '');
 	//console.log('minified source: '+this.source);
+	
 	this.source = this.parse(this.source);
+	this.compile();
 };
 /**
 * @private 
@@ -74,10 +77,11 @@ WebCLGLKernel.prototype.parse = function(source) {
 					var name = varMatches[nB].split('[')[0];
 					var vari = varMatches[nB].split('[')[1].split(']')[0];
 					var regexp = new RegExp(name+'\\['+vari.trim()+'\\]',"gm");
-					if(this.in_values[n].type == 'buffer') 
-						source = source.replace(regexp, 'in_data('+name+','+vari+')');
-					else if(this.in_values[n].type == 'buffer4') 
-						source = source.replace(regexp, 'in_data4('+name+','+vari+')');
+					
+					if(this.in_values[n].type == 'buffer_float4') 
+						source = source.replace(regexp, 'buffer_float4_data('+name+','+vari+')');
+					if(this.in_values[n].type == 'buffer_float') 
+						source = source.replace(regexp, 'buffer_float_data('+name+','+vari+')');
 				}
 			}
 		}
@@ -87,62 +91,21 @@ WebCLGLKernel.prototype.parse = function(source) {
 	return source;
 };
 /**
-* Bind float or a WebCLGLBuffer to a kernel argument
-* @type Void
-* @param {Int} numArgument
-* @param {Float|WebCLGLBuffer} data
-*/
-WebCLGLKernel.prototype.setKernelArg = function(numArgument, data) {
-	var isNewArg = (this.in_values[numArgument] == undefined || this.in_values[numArgument].value == undefined) ? true : false;
-	this.in_values[numArgument].value = data;
-	if(isNewArg) {
-		//this.updatePointers();
-	} else { 
-		if(this.in_values[numArgument].type == 'buffer' || this.in_values[numArgument].type == 'buffer4') {
-			this.samplers[this.in_values[numArgument].idPointer].value = this.in_values[numArgument].value;
-		} else if(this.in_values[numArgument].type == 'float') {
-			this.uniformsFloat[this.in_values[numArgument].idPointer].value = this.in_values[numArgument].value;
-		}
-	}
-};
-
-/**
-* Check if kernel is compilable
-* @returns {Bool}
 * @private 
 */
-WebCLGLKernel.prototype.isCompilable = function() {
-	for(var n = 0, f = this.in_values.length; n < f; n++)
-		if(this.in_values[n].value == undefined)
-			return false;
-	return true;
-};
-/**
-* Check if kernel is ready
-* @returns {Bool}
-* @private 
-*/
-WebCLGLKernel.prototype.isReady = function() {
-	if(this.ready == true) return true;
-	else if(this.isCompilable()) this.compile();
-};
-
-/**
-* Use this function if you update the source kernel "setKernelSource()" after of the call to enqueueNDRangeKernel
-* @type Void
- */
 WebCLGLKernel.prototype.compile = function() {
-	lines_uniforms = function(in_values) {
+	lines_attrs = (function() {
 		str = '';
-		for(var n = 0, f = in_values.length; n < f; n++) {
-			if(in_values[n].type == 'buffer' || in_values[n].type == 'buffer4') {
-				str += 'uniform sampler2D '+in_values[n].name+';\n';
-			} else if(in_values[n].type == 'float') {
-				str += 'uniform float '+in_values[n].name+';\n';
+		for(var n = 0, f = this.in_values.length; n < f; n++) {
+			if(this.in_values[n].type == 'buffer_float4' || this.in_values[n].type == 'buffer_float') {
+				str += 'uniform sampler2D '+this.in_values[n].name+';\n';
+			} else if(this.in_values[n].type == 'float') {
+				str += 'uniform float '+this.in_values[n].name+';\n';
 			}
 		}
 		return str;
-	};
+	}).bind(this);
+	
 	var sourceVertex = 	this.precision+
 		'attribute vec3 aVertexPosition;\n'+
 		'attribute vec2 aTextureCoord;\n'+
@@ -155,57 +118,79 @@ WebCLGLKernel.prototype.compile = function() {
 		'}\n';
 	var sourceFragment = this.precision+
 		
-		lines_uniforms(this.in_values)+
+		lines_attrs()+
+		
+		this.utils.unpackGLSLFunctionString()+ 
 		
 		'varying vec2 global_id;\n'+ 
 		
-		'float in_data(sampler2D arg, vec2 coord) {\n'+
-			'vec4 textureColor = texture2D(arg, coord);\n'+
-			'return textureColor.x;\n'+
-		'}\n'+
-		'vec4 in_data4(sampler2D arg, vec2 coord) {\n'+
+		'vec4 buffer_float4_data(sampler2D arg, vec2 coord) {\n'+
 			'vec4 textureColor = texture2D(arg, coord);\n'+
 			'return textureColor;\n'+
 		'}\n'+
+		'float buffer_float_data(sampler2D arg, vec2 coord) {\n'+
+			'vec4 textureColor = texture2D(arg, coord);\n'+
+			'return textureColor.x;\n'+
+		'}\n'+
+		
 		'vec2 get_global_id() {\n'+
 			'return global_id;\n'+
 		'}\n'+
+		
 		this.head+
+		
 		'void main(void) {\n'+
 			'float out_float = -999.99989;\n'+
 			'vec4 out_float4;\n'+
-			this.source+  
 			
-			'if(out_float != -999.99989) gl_FragColor = vec4(out_float,0.0,0.0,1.0);\n'+
-			'else gl_FragColor = out_float4;\n'+ 
-		'}\n';
-	this.kernel = this.gl.createProgram();
-	//console.log(sourceFragment);
-	this.utils.createShader("WEBCLGL", sourceVertex, sourceFragment, this.kernel);
+			this.source;
 	
-	this.updatePointers();
 	
-	this.attr_VertexPos = this.gl.getAttribLocation(this.kernel, "aVertexPosition");
-	this.attr_TextureCoord = this.gl.getAttribLocation(this.kernel, "aTextureCoord");
 	
-	this.ready = true;
+	var sourceFrag = sourceFragment+
+		'if(out_float != -999.99989) gl_FragColor = vec4(out_float,0.0,0.0,1.0);\n'+
+		'else gl_FragColor = out_float4;\n'+ 
+	'}\n';
+	
+	this.kernelPrograms = [	new WebCLGLKernelProgram(this.gl, sourceVertex, sourceFrag, this.in_values) ];
+	
 	return true;
 };
+
 /**
- * @private 
- */
-WebCLGLKernel.prototype.updatePointers = function() {
-	this.samplers = [];
-	this.uniformsFloat = [];
-	for(var n = 0, f = this.in_values.length; n < f; n++) {
-		if(this.in_values[n].type == 'buffer' || this.in_values[n].type == 'buffer4') {
-			this.samplers.push({location:this.gl.getUniformLocation(this.kernel, this.in_values[n].name),
-								value:this.in_values[n].value});
-			this.in_values[n].idPointer = this.samplers.length-1;
-		} else if(this.in_values[n].type == 'float') {
-			this.uniformsFloat.push({location:this.gl.getUniformLocation(this.kernel, this.in_values[n].name),
-									value:this.in_values[n].value});
-			this.in_values[n].idPointer = this.uniformsFloat.length-1;
+* Bind float or a WebCLGLBuffer to a kernel argument
+* @type Void
+* @param {Int|String} argument Id of argument or name of this
+* @param {Float|Int|WebCLGLBuffer} data
+*/
+WebCLGLKernel.prototype.setKernelArg = function(argument, data) {
+	if(data == undefined) alert("Error in setKernelArg("+argument+", data) (this data is undefined)"); 
+	
+	var numArg;
+	if(typeof argument != "string") {
+		numArg = argument;
+	} else {
+		for(var n=0, fn = this.in_values.length; n < fn; n++) {
+			if(this.in_values[n].name == argument) {
+				numArg = n;
+				break;
+			}
+		}
+	}
+	
+	if(this.in_values[numArg] == undefined) {
+		console.log("argument "+argument+" not exist in this kernel");
+		return;
+	}
+	this.in_values[numArg].value = data;
+	
+	for(var n=0, fn = this.kernelPrograms.length; n < fn; n++) {
+		var kp = this.kernelPrograms[n];
+		
+		if(this.in_values[numArg].type == 'buffer_float4' || this.in_values[numArg].type == 'buffer_float') {
+			kp.samplers[this.in_values[numArg].idPointer].value = this.in_values[numArg].value;
+		} else if(this.in_values[numArg].type == 'float') {
+			kp.uniforms[this.in_values[numArg].idPointer].value = this.in_values[numArg].value;			
 		}
 	}
 };

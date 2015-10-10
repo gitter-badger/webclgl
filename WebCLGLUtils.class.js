@@ -7,6 +7,19 @@ WebCLGLUtils = function(gl) {
 	this.gl = gl;
 };
 
+/** @private  */
+WebCLGLUtils.prototype.isPowerOfTwo = function(x) {
+    return (x & (x - 1)) == 0;
+};
+/** @private  */
+WebCLGLUtils.prototype.nextHighestPowerOfTwo = function(x) {
+    --x;
+    for (var i = 1; i < 32; i <<= 1) {
+        x = x | x >> i;
+    }
+    return x + 1;
+};
+
 /**
 * @private 
 */
@@ -110,7 +123,12 @@ WebCLGLUtils.prototype.createShader = function(name, sourceVertex, sourceFragmen
 			if(this.gl.getProgramInfoLog(shaderProgram) != undefined) {
 				console.log(this.gl.getProgramInfoLog(shaderProgram));
 			} 
+			return false;
+		} else {
+			return true;
 		}
+	} else {
+		return false;
 	}
 };
 
