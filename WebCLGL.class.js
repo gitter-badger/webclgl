@@ -48,6 +48,9 @@ WebCLGL = function(webglcontext) {
 		}
 	} else this.gl = webglcontext; 
 		
+	this.gl.getExtension('OES_texture_float');	
+	this.gl.getExtension('OES_texture_float_linear');
+	
 	var highPrecisionSupport = this.gl.getShaderPrecisionFormat(this.gl.FRAGMENT_SHADER, this.gl.HIGH_FLOAT);
 	this.precision = (highPrecisionSupport.precision != 0) ? 'precision highp float;\n\nprecision highp int;\n\n' : 'precision lowp float;\n\nprecision lowp int;\n\n';
 	
@@ -149,6 +152,7 @@ WebCLGL = function(webglcontext) {
 	
 	this.sampler_copyTexture_toSave = this.gl.getUniformLocation(this.shader_copyTexture, "sampler_toSave");
 };
+
 /**
 * Copy one WebCLGLBuffer|WebGLTexture to another WebCLGLBuffer|WebGLTexture.
 * @param {WebCLGLBuffer|WebGLTexture} valueToRead The buffer to read.
@@ -165,7 +169,7 @@ WebCLGL = function(webglcontext) {
 */
 WebCLGL.prototype.copy = function(valueToRead, valueToWrite) { 
 	if(valueToRead instanceof WebCLGLBuffer) {
-		this.gl.viewport(0, 0, valueToWrite.W, valueToWrite.H); 
+		this.gl.viewport(0, 0, valueToWrite.W, valueToWrite.H);
 		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, valueToWrite.fBuffer); 
 		this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, valueToWrite.textureData, 0);
 	} else
@@ -189,23 +193,19 @@ WebCLGL.prototype.copy = function(valueToRead, valueToWrite) {
 	this.gl.vertexAttribPointer(this.attr_copyTexture_tex, 3, this.gl.FLOAT, false, 0, 0);
 	
 	this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer_QUAD);
-	this.gl.drawElements(this.gl.TRIANGLES, 6, this.gl.UNSIGNED_SHORT, 0);	
+	this.gl.drawElements(this.gl.TRIANGLES, 6, this.gl.UNSIGNED_SHORT, 0);
 };
+
 /**
 * Create a empty WebCLGLBuffer 
-* @param {Int|Array<Float>} length Length of buffer.<br>
-									* Or Array with width and height values if is for a WebGLTexture
-* @param {String} [type="FLOAT"] type FLOAT or FLOAT4
+* @param {Int|Array<Float>} length Length of buffer or Array with width and height values if is for a WebGLTexture
+* @param {String} [type="FLOAT"] type FLOAT4 OR FLOAT
 * @param {Int} [offset=0] If 0 the range is from 0.0 to 1.0 else if >0 then the range is from -offset.0 to offset.0
 * @property {Bool} [linear=false] linear texParameteri type for the WebGLTexture
 * @returns {WebCLGLBuffer} 
 */
-WebCLGL.prototype.createBuffer = function(length, type, offset, linear) {	
-	var webclglBuffer = new WebCLGLBuffer(this.gl, length, type, linear);	  
-	//if(type != undefined && type == 'FLOAT4') webclglBuffer.type = 'FLOAT4';
-	if(offset != undefined) webclglBuffer.offset = offset;   
-	
-	return webclglBuffer;
+WebCLGL.prototype.createBuffer = function(length, type, offset, linear) {
+	return new WebCLGLBuffer(this.gl, length, type, offset, linear);
 };
 
 /**
@@ -226,7 +226,7 @@ WebCLGL.prototype.createKernel = function(source, header) {
 * @param {Array|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement} array 
 * @param {Bool} [flip=false]
 */
-WebCLGL.prototype.enqueueWriteBuffer = function(buffer, arr, flip) {		
+WebCLGL.prototype.enqueueWriteBuffer = function(buffer, arr, flip) {
 	buffer.inData = arr;
 	if(arr instanceof WebGLTexture) buffer.textureData = arr;
 	else {		
@@ -237,34 +237,28 @@ WebCLGL.prototype.enqueueWriteBuffer = function(buffer, arr, flip) {
 		this.gl.pixelStorei(this.gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false); 
 		this.gl.bindTexture(this.gl.TEXTURE_2D, buffer.textureData);
 		if(arr instanceof HTMLImageElement)  {
-			buffer.inData = this.utils.getUint8ArrayFromHTMLImageElement(arr);   
-			//texImage2D(			target, 			level, 	internalformat, 	format, 		type, 					TexImageSource);
-			this.gl.texImage2D(		this.gl.TEXTURE_2D, 0, 		this.gl.RGBA, 		this.gl.RGBA, 	buffer._supportFormat, 	arr);
+			buffer.inData = this.utils.getUint8ArrayFromHTMLImageElement(arr);
+			//texImage2D(			target, 			level, 	internalformat, 	format, 		type, 			TexImageSource);
+			if(buffer.type == 'FLOAT4') {	 			
+				this.gl.texImage2D(	this.gl.TEXTURE_2D, 0, 		this.gl.RGBA, 		this.gl.RGBA, 	this.gl.FLOAT, 	arr);
+			}/* else if(buffer.type == 'INT4') {
+				this.gl.texImage2D(	this.gl.TEXTURE_2D, 0, 		this.gl.RGBA, 		this.gl.RGBA, 	this.gl.UNSIGNED_BYTE, 	arr);
+			}*/
 		} else {
 			//console.log("Write arr with length of "+arr.length+" in Buffer "+buffer.type+" with length of "+buffer.length+" (W: "+buffer.W+"; H: "+buffer.H+")");
 			
 			if(buffer.type == 'FLOAT4') {
-				while(arr.length < (buffer.W*buffer.H)*4) {
-					arr.push(0.0,0.0,0.0,0.0);
-				}
-				if(buffer._supportFormat == this.gl.FLOAT) {
-					if(arr instanceof Uint8Array) {
-						//texImage2D(			target, 			level, 	internalformat, 	width, height, border, 	format, 		type, 					pixels);
-						this.gl.texImage2D(		this.gl.TEXTURE_2D, 0, 		this.gl.RGBA, 		buffer.W, buffer.H, 0, 	this.gl.RGBA, 	buffer._supportFormat, 	new Float32Array(arr));
-					} else if(arr instanceof Float32Array) {
-						this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, buffer.W, buffer.H, 0, this.gl.RGBA, buffer._supportFormat, arr);
-					} else {
-						this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, buffer.W, buffer.H, 0, this.gl.RGBA, buffer._supportFormat, new Float32Array(arr));
-					}
+				//texImage2D(			target, 			level, 	internalformat, 	width, height, border, 	format, 		type, 			pixels);
+				if(arr instanceof Uint8Array) {
+					this.gl.texImage2D(	this.gl.TEXTURE_2D, 0, 		this.gl.RGBA, 		buffer.W, buffer.H, 0, 	this.gl.RGBA, 	this.gl.FLOAT, 	new Float32Array(arr));
+				} else if(arr instanceof Float32Array) {
+					this.gl.texImage2D(this.gl.TEXTURE_2D, 	0, 		this.gl.RGBA, 		buffer.W, buffer.H, 0, 	this.gl.RGBA, 	this.gl.FLOAT, 	arr);
 				} else {
-					this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, buffer.W, buffer.H, 0, this.gl.RGBA, buffer._supportFormat, new Uint8Array(arr));
+					while(arr.length < (buffer.W*buffer.H)*4)  arr.push(0.0,0.0,0.0,0.0);
+					this.gl.texImage2D(this.gl.TEXTURE_2D, 	0, 		this.gl.RGBA, 		buffer.W, buffer.H, 0, 	this.gl.RGBA, 	this.gl.FLOAT, 	new Float32Array(arr));
 				}
 			} else if(buffer.type == 'FLOAT') {
-				var arrayTemp;
-				if(buffer._supportFormat == this.gl.FLOAT) 
-					arrayTemp = new Float32Array(buffer.W*buffer.H*4); 
-				else 
-					arrayTemp = new Uint8Array(buffer.W*buffer.H*4);
+				var arrayTemp = new Float32Array(buffer.W*buffer.H*4); 
 				
 				for(var n = 0, f = buffer.W*buffer.H; n < f; n++) {
 					var idd = n*4;
@@ -273,9 +267,8 @@ WebCLGL.prototype.enqueueWriteBuffer = function(buffer, arr, flip) {
 					arrayTemp[idd+2] = 0.0;
 					arrayTemp[idd+3] = 0.0; 
 				}
-				arr = arrayTemp;
-				
-				this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, buffer.W, buffer.H, 0, this.gl.RGBA, buffer._supportFormat, arr); 
+				arr = arrayTemp;				
+				this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, buffer.W, buffer.H, 0, this.gl.RGBA, this.gl.FLOAT, arr);
 			}
 		}
 	}
@@ -288,50 +281,59 @@ WebCLGL.prototype.enqueueWriteBuffer = function(buffer, arr, flip) {
 * @param {WebCLGLKernel} kernel 
 * @param {WebCLGLBuffer} buffer
 */
-WebCLGL.prototype.enqueueNDRangeKernel = function(kernel, buffer) {	
+WebCLGL.prototype.enqueueNDRangeKernel = function(kernel, buffer) {
+	this.gl.viewport(0, 0, buffer.W, buffer.H);		
 	this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, buffer.fBuffer); 
 	this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, buffer.textureData, 0);
-	this.gl.viewport(0, 0, buffer.W, buffer.H);  
-	this.gl.useProgram(kernel.kernel);  
-	
+	var kp = kernel.kernelPrograms[0];
+	this.gl.useProgram(kp.kernel);  
+
 	var currentTextureUnit = 0;
-	for(var n = 0, f = kernel.samplers.length; n < f; n++) {
+	for(var n = 0, f = kp.samplers.length; n < f; n++) {
 		if(currentTextureUnit < 16)
-			this.gl.activeTexture(this.gl["TEXTURE"+currentTextureUnit++]);
+			this.gl.activeTexture(this.gl["TEXTURE"+currentTextureUnit]);
 		else
 			this.gl.activeTexture(this.gl["TEXTURE16"]);
 		
-		this.gl.bindTexture(this.gl.TEXTURE_2D, kernel.samplers[n].value.textureData);
-		this.gl.uniform1i(kernel.samplers[n].location, n);
+		this.gl.bindTexture(this.gl.TEXTURE_2D, kp.samplers[n].value.textureData);
+		this.gl.uniform1i(kp.samplers[n].location[0], currentTextureUnit);
+		
+		currentTextureUnit++;
 	}
-	for(var n = 0, f = kernel.uniformsFloat.length; n < f; n++) {
-		this.gl.uniform1f(kernel.uniformsFloat[n].location, kernel.uniformsFloat[n].value);
-	}
+	for(var n = 0, f = kp.uniforms.length; n < f; n++) 		
+		this.gl.uniform1f(kp.uniforms[n].location, kp.uniforms[n].value);
 	
-	this.gl.enableVertexAttribArray(kernel.attr_VertexPos);
+	
+	this.gl.enableVertexAttribArray(kp.attr_VertexPos);
 	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer_QUAD);
-	this.gl.vertexAttribPointer(kernel.attr_VertexPos, 3, buffer._supportFormat, false, 0, 0);
+	this.gl.vertexAttribPointer(kp.attr_VertexPos, 3, buffer._supportFormat, false, 0, 0);
 	
-	this.gl.enableVertexAttribArray(kernel.attr_TextureCoord);
+	this.gl.enableVertexAttribArray(kp.attr_TextureCoord);
 	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureBuffer_QUAD);
-	this.gl.vertexAttribPointer(kernel.attr_TextureCoord, 3, buffer._supportFormat, false, 0, 0);
+	this.gl.vertexAttribPointer(kp.attr_TextureCoord, 3, buffer._supportFormat, false, 0, 0);
 	
 	this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer_QUAD);
 	this.gl.drawElements(this.gl.TRIANGLES, 6, this.gl.UNSIGNED_SHORT, 0);
 };
+
 /**
-* Get the internally WebGLTexture (type FLOAT), if the WebGLRenderingContext was given. <br>  
+* Get the internally WebGLTexture (type FLOAT), if the WebGLRenderingContext was given.
 * @returns {WebGLTexture}
 */
-WebCLGL.prototype.enqueueReadBuffer_WebGLTexture = function(buffer) {	
+WebCLGL.prototype.enqueueReadBuffer_WebGLTexture = function(buffer) {
 	return buffer.textureData;
 };
+
 /**
-* Compute readpixel
-* @private 
-*/
-WebCLGL.prototype.enqueueReadBuffer = function(buffer) {
-	//buffer.outArray4Uint8Array = new Uint8Array((buffer.W*buffer.H)*4);
+* Get RGBAUint8Array array from a WebCLGLBuffer <br>
+* Read buffer in a specifics WebGL 32bit channel and return the data in one array of packets RGBA_Uint8Array <br>
+* @param {WebCLGLBuffer} buffer
+* @param {Int} channel Channel to read
+* @returns {Uint8Array}
+**/
+WebCLGL.prototype.enqueueReadBuffer = function(buffer, item) {
+	this.gl.uniform1i(this.u_vectorValue, item);
+	
 	this.gl.uniform1i(this.u_offset, buffer.offset); 
 	
 	this.gl.activeTexture(this.gl.TEXTURE0);
@@ -350,23 +352,88 @@ WebCLGL.prototype.enqueueReadBuffer = function(buffer) {
 	this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer_QUAD);
 	this.gl.drawElements(this.gl.TRIANGLES, 6, this.gl.UNSIGNED_SHORT, 0);
 	
-	
-	//console.log(buffer.outArray4Uint8Array);
-		//console.log("W: "+buffer.H); 
-		//console.log("H: "+buffer.H); 
-	this.gl.readPixels(0, 0, buffer.W, buffer.H, this.gl.RGBA, this.gl.UNSIGNED_BYTE, buffer.outArray4Uint8Array);
-		//console.log(buffer.outArray4Uint8Array);  
-	//return buffer.outArray4Uint8Array.splice(buffer.length, buffer.outArray4Uint8Array.length); 
-	return buffer.outArray4Uint8Array.subarray(0, (buffer.length)*4);
+	var arrLength = buffer.length*4;
+	if(item == 0) {
+		this.gl.readPixels(0, 0, buffer.W, buffer.H, this.gl.RGBA, this.gl.UNSIGNED_BYTE, buffer.outArray4Uint8ArrayX);
+		return buffer.outArray4Uint8ArrayX.subarray(0, arrLength);
+	} else if(item == 1) {
+		this.gl.readPixels(0, 0, buffer.W, buffer.H, this.gl.RGBA, this.gl.UNSIGNED_BYTE, buffer.outArray4Uint8ArrayY);
+		return buffer.outArray4Uint8ArrayY.subarray(0, arrLength);
+	} else if(item == 2) {
+		this.gl.readPixels(0, 0, buffer.W, buffer.H, this.gl.RGBA, this.gl.UNSIGNED_BYTE, buffer.outArray4Uint8ArrayZ);
+		return buffer.outArray4Uint8ArrayZ.subarray(0, arrLength);
+	} else if(item == 3) {
+		this.gl.readPixels(0, 0, buffer.W, buffer.H, this.gl.RGBA, this.gl.UNSIGNED_BYTE, buffer.outArray4Uint8ArrayW);
+		return buffer.outArray4Uint8ArrayW.subarray(0, arrLength);
+	}
 	
 	//this.gl.clearColor(0.0, 0.0, 0.0, 0.0);
 	//this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 };
+
 /**
-* Get native packet 4Uint8Array from WebCLGLBuffer type FLOAT <br>
-* Internally performs one renderToTexture from the computed WebGLTexture storing the result in a "packetUint8Array RGBA" and returns the result through a gl.readPixels().
+* Get 4 RGBAUint8Array arrays from a WebCLGLBuffer type FLOAT4 <br>
+* Internally performs four calls to enqueueReadBuffer and return the data in one array of four packets RGBA_Uint8Array
 * @param {WebCLGLBuffer} buffer
-* @returns {Uint8Array}
+* @returns {Array<Uint8Array>}
+**/
+WebCLGL.prototype.enqueueReadBuffer_Packet4Uint8Array_Float4 = function(buffer) {
+	if(buffer.type == "FLOAT4") {		
+		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+		this.gl.viewport(0, 0, buffer.W, buffer.H); 
+		if(this.e != undefined) {this.e.width = buffer.W;this.e.height = buffer.H;}
+		
+		this.gl.useProgram(this.shader_readpixels);
+		
+		return [this.enqueueReadBuffer(buffer, 0),
+		        this.enqueueReadBuffer(buffer, 1),
+		        this.enqueueReadBuffer(buffer, 2),
+		        this.enqueueReadBuffer(buffer, 3)];
+	} else 
+		return false;
+};
+
+/**
+* Get 4 Float32Array arrays from a WebCLGLBuffer type FLOAT4 <br>
+* Internally performs one calls to enqueueReadBuffer_Packet4Uint8Array_Float4 and makes unpacking
+* @param {WebCLGLBuffer} buffer
+* @returns {Array<Float32Array>}
+*/
+WebCLGL.prototype.enqueueReadBuffer_Float4 = function(buffer) {
+	if(buffer.type == "FLOAT4") {
+		var packet4Uint8Array = this.enqueueReadBuffer_Packet4Uint8Array_Float4(buffer);
+		
+		var arrayOut = [];	
+		for(var n=0, fn= packet4Uint8Array.length; n < fn; n++) {
+			var arr = packet4Uint8Array[n];
+			
+			var outArrayFloat32Array = new Float32Array((buffer.W*buffer.H)*4);
+			for(var nb = 0, fnb = arr.length/4; nb < fnb; nb++) {
+				var idd = nb*4;
+				if(buffer.offset>0) outArrayFloat32Array[nb] = (this.utils.unpack([arr[idd+0]/255,
+																							arr[idd+1]/255,
+																							arr[idd+2]/255,
+																							arr[idd+3]/255])*(buffer.offset*2))-buffer.offset;
+				else outArrayFloat32Array[nb] = (this.utils.unpack([	arr[idd+0]/255,
+																			arr[idd+1]/255,
+																			arr[idd+2]/255,
+																			arr[idd+3]/255]));
+			}
+			
+			arrayOut.push(outArrayFloat32Array);
+		}
+		
+		return arrayOut;
+	} else 
+		return false;	
+};
+
+/**
+* Get 1 RGBAUint8Array array from a WebCLGLBuffer type FLOAT <br>
+* Internally performs one call to enqueueReadBuffer and return the data in one array of one packets RGBA_Uint8Array
+* @param {WebCLGLBuffer} buffer
+* @returns {Array<Uint8Array>}
+* 
 * @example
 * // Unpack in your shader to float with:
 * float unpack (vec4 4Uint8Array) {
@@ -381,138 +448,61 @@ WebCLGL.prototype.enqueueReadBuffer = function(buffer) {
 * // JAVASCRIPT IF UNPACK IN VERTEX PROGRAM
 * attr_FloatInPacket4Uint8Array = gl.getAttribLocation(shaderProgram, "atributeFloatInPacket4Uint8Array");
 * gl.bindBuffer(gl.ARRAY_BUFFER, webGLBufferObject);
-* gl.bufferSubData(gl.ARRAY_BUFFER, 0, webCLGL.enqueueReadBuffer_Float_Packet4Uint8Array(buffer_XX));  
+* gl.bufferSubData(gl.ARRAY_BUFFER, 0, webCLGL.enqueueReadBuffer_Packet4Uint8Array_Float(buffer_XX)[0]);  
 * gl.vertexAttribPointer(attr_FloatInPacket4Uint8Array, 4, gl.UNSIGNED_BYTE, true, 0, 0); // true for normalize
 *
 * // JAVASCRIPT IF UNPACK IN FRAGMENT PROGRAM
 * sampler_FloatInPacket4Uint8Array = gl.getUniformLocation(shaderProgram, "samplerFloatInPacket4Uint8Array");
 * gl.activeTexture(gl.TEXTURE0);
 * gl.bindTexture(gl.TEXTURE_2D, webGLTextureObject);
-* gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, viewportWidth,viewportHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, webCLGL.enqueueReadBuffer_Float_Packet4Uint8Array(buffer_XX));
+* gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, viewportWidth,viewportHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, webCLGL.enqueueReadBuffer_Packet4Uint8Array_Float(buffer_XX)[0]);
 * gl.uniform1i(sampler_FloatInPacket4Uint8Array, 0);
+*/
+WebCLGL.prototype.enqueueReadBuffer_Packet4Uint8Array_Float = function(buffer) {
+	if(buffer.type == "FLOAT") {		
+		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+		this.gl.viewport(0, 0, buffer.W, buffer.H); 
+		if(this.e != undefined) {this.e.width = buffer.W;this.e.height = buffer.H;}
+		
+		
+		this.gl.useProgram(this.shader_readpixels);
+	
+		return [this.enqueueReadBuffer(buffer, 0)];
+	} else 
+		return false;
+}; 
 
-
-*/
-WebCLGL.prototype.enqueueReadBuffer_Float_Packet4Uint8Array = function(buffer) {	 
-	this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null); 
-	this.gl.viewport(0, 0, buffer.W, buffer.H); 
-	if(this.e != undefined) {this.e.width = buffer.W;this.e.height = buffer.H;}
-	this.gl.useProgram(this.shader_readpixels);  
-	
-	this.gl.uniform1i(this.u_vectorValue, 0);
-	return this.enqueueReadBuffer(buffer);
-};
 /**
-* Get Float32Array from WebCLGLBuffer type FLOAT <br>
-* Internally performs one calls to enqueueReadBuffer_Float_Packet4Uint8Array and makes unpacking
+* Get 1 Float32Array array from a WebCLGLBuffer type FLOAT <br>
+* Internally performs one calls to enqueueReadBuffer_Packet4Uint8Array_Float and makes unpacking
 * @param {WebCLGLBuffer} buffer
-* @returns {Float32Array}
+* @returns {Array<Float32Array>}
 */
-WebCLGL.prototype.enqueueReadBuffer_Float = function(buffer) {	
-	buffer.outArrayFloat32ArrayX = [];
-	this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null); 
-	this.gl.viewport(0, 0, buffer.W, buffer.H); 
-	if(this.e != undefined) {this.e.width = buffer.W;this.e.height = buffer.H;}
-	this.gl.useProgram(this.shader_readpixels);  
-	
-	this.gl.uniform1i(this.u_vectorValue, 0);
-	var packet4Uint8Array = this.enqueueReadBuffer(buffer);
-	
-	for(var n = 0, f = packet4Uint8Array.length/4; n < f; n++) {
-		var idd = n*4;
-		if(buffer.offset>0) buffer.outArrayFloat32ArrayX[n] = (this.utils.unpack([packet4Uint8Array[idd+0]/255,
-																					packet4Uint8Array[idd+1]/255,
-																					packet4Uint8Array[idd+2]/255,
-																					packet4Uint8Array[idd+3]/255])*(buffer.offset*2))-buffer.offset;
-		else buffer.outArrayFloat32ArrayX[n] = (this.utils.unpack([	packet4Uint8Array[idd+0]/255,
-																	packet4Uint8Array[idd+1]/255,
-																	packet4Uint8Array[idd+2]/255,
-																	packet4Uint8Array[idd+3]/255]));
-	}
-	
-	return buffer.outArrayFloat32ArrayX;  
-};
-/**
-* Get 4Float32Array from WebCLGLBuffer type FLOAT4 <br>
-* Internally performs four calls to enqueueReadBuffer_Float_Packet4Uint8Array and makes unpacking
-* @param {WebCLGLBuffer} buffer
-* @returns {Float32Array}
-*/
-WebCLGL.prototype.enqueueReadBuffer_Float4 = function(buffer) {	 
-	buffer.outArrayFloat32ArrayX = [];
-	buffer.outArrayFloat32ArrayY = [];
-	buffer.outArrayFloat32ArrayZ = [];
-	buffer.outArrayFloat32ArrayW = [];
-	buffer.outArray4Float32Array = [];
-	this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null); 
-	this.gl.viewport(0, 0, buffer.W, buffer.H); 
-	if(this.e != undefined) {this.e.width = buffer.W;this.e.height = buffer.H;}
-	this.gl.useProgram(this.shader_readpixels);  
-	
-	this.gl.uniform1i(this.u_vectorValue, 0);
-	var packet4Uint8Array = this.enqueueReadBuffer(buffer);
-	for(var n = 0, f = packet4Uint8Array.length/4; n < f; n++) {
-		var idd = n*4;
-		if(buffer.offset>0) buffer.outArrayFloat32ArrayX[n] = (this.utils.unpack([packet4Uint8Array[idd+0]/255,
-																					packet4Uint8Array[idd+1]/255,
-																					packet4Uint8Array[idd+2]/255,
-																					packet4Uint8Array[idd+3]/255])*(buffer.offset*2))-buffer.offset;
-		else buffer.outArrayFloat32ArrayX[n] = (this.utils.unpack([	packet4Uint8Array[idd+0]/255,
-																	packet4Uint8Array[idd+1]/255,
-																	packet4Uint8Array[idd+2]/255,
-																	packet4Uint8Array[idd+3]/255]));
-	}
-	
-	this.gl.uniform1i(this.u_vectorValue, 1);
-	packet4Uint8Array = this.enqueueReadBuffer(buffer);
-	for(var n = 0, f = packet4Uint8Array.length/4; n < f; n++) {
-		var idd = n*4;
-		if(buffer.offset>0) buffer.outArrayFloat32ArrayY[n] = (this.utils.unpack([packet4Uint8Array[idd+0]/255,
-																					packet4Uint8Array[idd+1]/255,
-																					packet4Uint8Array[idd+2]/255,
-																					packet4Uint8Array[idd+3]/255])*(buffer.offset*2))-buffer.offset;
-		else buffer.outArrayFloat32ArrayY[n] = (this.utils.unpack([	packet4Uint8Array[idd+0]/255,
-																	packet4Uint8Array[idd+1]/255,
-																	packet4Uint8Array[idd+2]/255,
-																	packet4Uint8Array[idd+3]/255]));
-	}
-	
-	this.gl.uniform1i(this.u_vectorValue, 2);
-	packet4Uint8Array = this.enqueueReadBuffer(buffer);
-	for(var n = 0, f = packet4Uint8Array.length/4; n < f; n++) {
-		var idd = n*4;
-		if(buffer.offset>0) buffer.outArrayFloat32ArrayZ[n] = (this.utils.unpack([packet4Uint8Array[idd+0]/255,
-																					packet4Uint8Array[idd+1]/255,
-																					packet4Uint8Array[idd+2]/255,
-																					packet4Uint8Array[idd+3]/255])*(buffer.offset*2))-buffer.offset;
-		else buffer.outArrayFloat32ArrayZ[n] = (this.utils.unpack([	packet4Uint8Array[idd+0]/255,
-																	packet4Uint8Array[idd+1]/255,
-																	packet4Uint8Array[idd+2]/255,
-																	packet4Uint8Array[idd+3]/255]));
-	}
-	
-	this.gl.uniform1i(this.u_vectorValue, 3);
-	packet4Uint8Array = this.enqueueReadBuffer(buffer);
-	for(var n = 0, f = packet4Uint8Array.length/4; n < f; n++) {
-		var idd = n*4; 
-		if(buffer.offset>0) buffer.outArrayFloat32ArrayW[n] = (this.utils.unpack([packet4Uint8Array[idd+0]/255,
-																					packet4Uint8Array[idd+1]/255,
-																					packet4Uint8Array[idd+2]/255,
-																					packet4Uint8Array[idd+3]/255])*(buffer.offset*2))-buffer.offset;
-		else buffer.outArrayFloat32ArrayW[n] = (this.utils.unpack([	packet4Uint8Array[idd+0]/255,
-																	packet4Uint8Array[idd+1]/255,
-																	packet4Uint8Array[idd+2]/255,
-																	packet4Uint8Array[idd+3]/255]));
-	}
-	
-	for(var n = 0, f = buffer.outArrayFloat32ArrayX.length; n < f; n++) {
-		var idd = n*4;
-		buffer.outArray4Float32Array[idd] = buffer.outArrayFloat32ArrayX[n];
-		buffer.outArray4Float32Array[idd+1] = buffer.outArrayFloat32ArrayY[n];
-		buffer.outArray4Float32Array[idd+2] = buffer.outArrayFloat32ArrayZ[n];
-		buffer.outArray4Float32Array[idd+3] = buffer.outArrayFloat32ArrayW[n]; 
-	}
-	
-	return buffer.outArray4Float32Array;  
-	
+WebCLGL.prototype.enqueueReadBuffer_Float = function(buffer) {
+	if(buffer.type == "FLOAT") {
+		var packet4Uint8Array = this.enqueueReadBuffer_Packet4Uint8Array_Float(buffer);
+		
+		var arrayOut = [];		
+		for(var n=0, fn= packet4Uint8Array.length; n < fn; n++) {
+			var arr = packet4Uint8Array[n];
+			
+			var outArrayFloat32Array = new Float32Array((buffer.W*buffer.H)*4);
+			for(var nb = 0, fnb = arr.length/4; nb < fnb; nb++) {
+				var idd = nb*4;
+				if(buffer.offset>0) outArrayFloat32Array[nb] = (this.utils.unpack([arr[idd+0]/255,
+																							arr[idd+1]/255,
+																							arr[idd+2]/255,
+																							arr[idd+3]/255])*(buffer.offset*2))-buffer.offset;
+				else outArrayFloat32Array[nb] = (this.utils.unpack([	arr[idd+0]/255,
+																			arr[idd+1]/255,
+																			arr[idd+2]/255,
+																			arr[idd+3]/255]));
+			}
+			
+			arrayOut.push(outArrayFloat32Array);
+		}
+		
+		return arrayOut;
+	} else 
+		return false	
 };

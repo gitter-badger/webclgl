@@ -6,22 +6,9 @@
 * @property {Array<Float>} inData Original array
 * @property {Int} [offset=0] offset of buffer
 */
-WebCLGLBuffer = function(gl, length, type, linear) { 
+WebCLGLBuffer = function(gl, length, type, offset, linear) { 
 	this.gl = gl;
-	 
-	this._floatSupport = (this.gl.getExtension('OES_texture_float')) ? true : false;
-	if(this._floatSupport)
-		this._supportFormat = this.gl.FLOAT;
-	else
-		this._supportFormat = this.gl.UNSIGNED_BYTE;
-	
-	this._floatLinearSupport = (this.gl.getExtension('OES_texture_float_linear')) ? true : false; 
-	if(this._floatLinearSupport)
-		this._supportFormat = this.gl.FLOAT;
-	else
-		this._supportFormat = this.gl.UNSIGNED_BYTE; 
 		
-	this.type = (type != undefined) ? type : 'FLOAT'; // FLOAT OR FLOAT4
 	if(length instanceof Object) { 
 		this.length = length[0]*length[1];
 		this.W = length[0];
@@ -31,10 +18,15 @@ WebCLGLBuffer = function(gl, length, type, linear) {
 		this.W = Math.ceil(Math.sqrt(this.length)); 
 		this.H = this.W;
 	}
-	this.utils = new WebCLGLUtils(this.gl);
+	//this.utils = new WebCLGLUtils(this.gl);
 	
-	this.offset = 0;
-	this.linear = linear;
+	this.type = (type != undefined) ? type : 'FLOAT';
+	this._supportFormat = this.gl.FLOAT;
+	//this._supportFormat = this.gl.UNSIGNED_BYTE;
+	
+	this.offset = (offset != undefined) ? offset : 0;   
+	
+	this.linear = (linear != undefined && linear == true) ? true : false;	
 	
 	
 	this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, false);
@@ -42,7 +34,7 @@ WebCLGLBuffer = function(gl, length, type, linear) {
 	
 	this.textureData = this.gl.createTexture();
 	this.gl.bindTexture(this.gl.TEXTURE_2D, this.textureData);  
-	if(this.linear != undefined && this.linear) {
+	if(this.linear != undefined && this.linear == true) {
 		this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.W,this.H, 0, this.gl.RGBA, this._supportFormat, null); 
 		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
 		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_NEAREST); 
@@ -56,12 +48,14 @@ WebCLGLBuffer = function(gl, length, type, linear) {
 	} 
 	
 	this.inData;
-	this.outArray4Uint8Array = new Uint8Array((this.W*this.H)*4); 
-	this.outArrayFloat32ArrayX = [];
-	this.outArrayFloat32ArrayY = [];
-	this.outArrayFloat32ArrayZ = [];
-	this.outArrayFloat32ArrayW = [];
-	this.outArray4Float32Array = [];
+	this.outArray4Uint8ArrayX = new Uint8Array((this.W*this.H)*4); 
+	this.outArray4Uint8ArrayY = new Uint8Array((this.W*this.H)*4); 
+	this.outArray4Uint8ArrayZ = new Uint8Array((this.W*this.H)*4);
+	this.outArray4Uint8ArrayW = new Uint8Array((this.W*this.H)*4); 
+	/*this.outArray4x4Uint8Array = new Uint8Array((this.W*this.H)*4*4);*/ 
+	
+	this.outArrayFloat32ArrayX = new Float32Array((this.W*this.H)*4);
+	
 	
 	// FRAMEBUFFER FOR enqueueNDRangeKernel
 	this.rBuffer = this.gl.createRenderbuffer();

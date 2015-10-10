@@ -123,7 +123,12 @@ WebCLGLUtils.prototype.createShader = function(name, sourceVertex, sourceFragmen
 			if(this.gl.getProgramInfoLog(shaderProgram) != undefined) {
 				console.log(this.gl.getProgramInfoLog(shaderProgram));
 			} 
+			return false;
+		} else {
+			return true;
 		}
+	} else {
+		return false;
 	}
 };
 
