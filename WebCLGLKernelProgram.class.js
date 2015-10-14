@@ -5,10 +5,10 @@
 */
 WebCLGLKernelProgram = function(gl, sv, sf, in_values) { 
 	this.gl = gl;
-	this.utils = new WebCLGLUtils(this.gl);
+	this.utils = new WebCLGLUtils();
 	
 	this.kernel = this.gl.createProgram();
-	this.utils.createShader("WEBCLGL", sv, sf, this.kernel);
+	this.utils.createShader(this.gl, "WEBCLGL", sv, sf, this.kernel);
 	//console.log(sourceF);	
 	
 	this.samplers = []; // {location,value}
