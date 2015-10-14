@@ -31,8 +31,8 @@
 				A.push(randA);
 				B.push(randB);
 			}
-			document.getElementById('DIVA').innerText = A;
-			document.getElementById('DIVB').innerText = B;			
+			document.getElementById('DIVA').appendChild(document.createTextNode(A));
+			document.getElementById('DIVB').appendChild(document.createTextNode(B));			
 			
 			
 			
@@ -83,7 +83,7 @@
       
       
 			A = webCLGL.enqueueReadBuffer_Float(buffer_A);
-			document.getElementById('DIVA_GPU').innerText = A;
+			document.getElementById('DIVA_GPU').appendChild(document.createTextNode(Array.prototype.slice.call(A[0])));
 		</script>
 		
 	</body>

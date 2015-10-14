@@ -33,8 +33,8 @@
 			  A.push(randB,randA,randB/2.0,1.0);
 			  B.push(randB,randA,randB/2.0,1.0);
 		  }
-		  document.getElementById('DIVA').innerText = A;
-		  document.getElementById('DIVB').innerText = B;
+		  document.getElementById('DIVA').appendChild(document.createTextNode(A));
+		  document.getElementById('DIVB').appendChild(document.createTextNode(B));
 		  
 		  
 		  
@@ -64,7 +64,7 @@
 		  
 		  
 		  var C_GPU = webCLGL.enqueueReadBuffer_Float4(buffer_C);
-		  document.getElementById('DIVC_GPU').innerText = C_GPU;
+		  document.getElementById('DIVC_GPU').appendChild(document.createTextNode(Array.prototype.slice.call(C_GPU[0])));
 		</script>
 		
 	</body>
