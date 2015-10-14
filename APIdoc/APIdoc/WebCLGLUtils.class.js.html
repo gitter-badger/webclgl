@@ -48,6 +48,10 @@
 							<a href="WebCLGLUtils.html">WebCLGLUtils</a>
 						</li>
 						
+						<li>
+							<a href="WebCLGLVertexFragmentProgram.html">WebCLGLVertexFragmentProgram</a>
+						</li>
+						
 
 					</ul>
 				</li>
@@ -74,8 +78,8 @@
 * @class
 * @constructor
 */
-WebCLGLUtils = function(gl) { 
-	this.gl = gl;
+WebCLGLUtils = function() { 
+	
 };
 
 /** @private  */
@@ -124,32 +128,52 @@ WebCLGLUtils.prototype.loadQuad = function(node, length, height) {
 	
 	return meshObject;
 };
+/** @private **/
+WebCLGLUtils.prototype.getWebGLContextFromCanvas = function(canvas, ctxOpt) {
+	var gl;
+	try {
+		if(ctxOpt == undefined) gl = canvas.getContext("webgl");
+		else gl = canvas.getContext("webgl", ctxOpt);
+	} catch(e) {
+		gl = null;
+    }
+	if(gl == null) {
+		try {
+			if(ctxOpt == undefined) gl = canvas.getContext("experimental-webgl");
+			else gl = canvas.getContext("experimental-webgl", ctxOpt);
+		} catch(e) {
+			gl = null;
+		}
+	}
+	if(gl == null) gl = false;
+	return gl;
+};
 /**
  * @private 
  */
-WebCLGLUtils.prototype.createShader = function(name, sourceVertex, sourceFragment, shaderProgram) {
+WebCLGLUtils.prototype.createShader = function(gl, name, sourceVertex, sourceFragment, shaderProgram) {
 	var _sv = false, _sf = false;
 	
-	var shaderVertex = this.gl.createShader(this.gl.VERTEX_SHADER);
-	this.gl.shaderSource(shaderVertex, sourceVertex);
-	this.gl.compileShader(shaderVertex);
-	if (!this.gl.getShaderParameter(shaderVertex, this.gl.COMPILE_STATUS)) {
+	var shaderVertex = gl.createShader(gl.VERTEX_SHADER);
+	gl.shaderSource(shaderVertex, sourceVertex);
+	gl.compileShader(shaderVertex);
+	if (!gl.getShaderParameter(shaderVertex, gl.COMPILE_STATUS)) {
 		alert('Error sourceVertex of shader '+name+'. See console.');
-		console.log('Error vertex-shader '+name+':\n '+this.gl.getShaderInfoLog(shaderVertex));
-		if(this.gl.getShaderInfoLog(shaderVertex) != undefined) {
-			console.log(this.gl.getShaderInfoLog(shaderVertex));
+		console.log('Error vertex-shader '+name+':\n '+gl.getShaderInfoLog(shaderVertex));
+		if(gl.getShaderInfoLog(shaderVertex) != undefined) {
+			console.log(gl.getShaderInfoLog(shaderVertex));
 		}
 	} else  {
-		this.gl.attachShader(shaderProgram, shaderVertex);
+		gl.attachShader(shaderProgram, shaderVertex);
 		_sv = true;
 	}
 	
-	var shaderFragment = this.gl.createShader(this.gl.FRAGMENT_SHADER);
-	this.gl.shaderSource(shaderFragment, sourceFragment);
-	this.gl.compileShader(shaderFragment);
-	if (!this.gl.getShaderParameter(shaderFragment, this.gl.COMPILE_STATUS)) {
+	var shaderFragment = gl.createShader(gl.FRAGMENT_SHADER);
+	gl.shaderSource(shaderFragment, sourceFragment);
+	gl.compileShader(shaderFragment);
+	if (!gl.getShaderParameter(shaderFragment, gl.COMPILE_STATUS)) {
 		alert('Error sourceFragment of shader '+name+'. See console.');
-		var infoLog = this.gl.getShaderInfoLog(shaderFragment);
+		var infoLog = gl.getShaderInfoLog(shaderFragment);
 		console.log('Error fragment-shader '+name+':\n '+infoLog);
 		if(infoLog != undefined) {
 			console.log(infoLog);
@@ -162,7 +186,7 @@ WebCLGLUtils.prototype.createShader = function(name, sourceVertex, sourceFragmen
 					arrErrors.push([line,errors[n]]);
 				}
 			}
-			var sour = this.gl.getShaderSource(shaderFragment).split("\n");
+			var sour = gl.getShaderSource(shaderFragment).split("\n");
 			sour.unshift("");
 			for(var n = 0, f = sour.length; n &lt; f; n++) {
 				var lineWithError = false;
@@ -182,17 +206,17 @@ WebCLGLUtils.prototype.createShader = function(name, sourceVertex, sourceFragmen
 			}
 		}
 	} else {
-		this.gl.attachShader(shaderProgram, shaderFragment);	
+		gl.attachShader(shaderProgram, shaderFragment);	
 		_sf = true;
 	}
 	
 	if(_sv == true &amp;&amp; _sf == true) {
-		this.gl.linkProgram(shaderProgram);
-		if (!this.gl.getProgramParameter(shaderProgram, this.gl.LINK_STATUS)) {
+		gl.linkProgram(shaderProgram);
+		if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
 			alert('Error in shader '+name);
 			console.log('Error shader program '+name+':\n ');
-			if(this.gl.getProgramInfoLog(shaderProgram) != undefined) {
-				console.log(this.gl.getProgramInfoLog(shaderProgram));
+			if(gl.getProgramInfoLog(shaderProgram) != undefined) {
+				console.log(gl.getProgramInfoLog(shaderProgram));
 			} 
 			return false;
 		} else {
@@ -263,33 +287,33 @@ WebCLGLUtils.prototype.unpack = function(colour) {
 * @returns {String}
 */
 WebCLGLUtils.prototype.packGLSLFunctionString = function() {
-	return 'vec4 pack (float depth) {'+
-				'const vec4 bias = vec4(1.0 / 255.0,'+
-							'1.0 / 255.0,'+
-							'1.0 / 255.0,'+
-							'0.0);'+
+	return 'vec4 pack (float depth) {\n'+
+				'const vec4 bias = vec4(1.0 / 255.0,\n'+
+							'1.0 / 255.0,\n'+
+							'1.0 / 255.0,\n'+
+							'0.0);\n'+
 
-				'float r = depth;'+
-				'float g = fract(r * 255.0);'+
-				'float b = fract(g * 255.0);'+
-				'float a = fract(b * 255.0);'+
-				'vec4 colour = vec4(r, g, b, a);'+
+				'float r = depth;\n'+
+				'float g = fract(r * 255.0);\n'+
+				'float b = fract(g * 255.0);\n'+
+				'float a = fract(b * 255.0);\n'+
+				'vec4 colour = vec4(r, g, b, a);\n'+
 				
-				'return colour - (colour.yzww * bias);'+
-			'}';
+				'return colour - (colour.yzww * bias);\n'+
+			'}\n';
 };
 /**
 * Get unpack GLSL function string
 * @returns {String}
 */
 WebCLGLUtils.prototype.unpackGLSLFunctionString = function() {
-	return 'float unpack (vec4 colour) {'+
-				'const vec4 bitShifts = vec4(1.0,'+
-								'1.0 / 255.0,'+
-								'1.0 / (255.0 * 255.0),'+
-								'1.0 / (255.0 * 255.0 * 255.0));'+
-				'return dot(colour, bitShifts);'+
-			'}';
+	return 'float unpack (vec4 colour) {\n'+
+				'const vec4 bitShifts = vec4(1.0,\n'+
+								'1.0 / 255.0,\n'+
+								'1.0 / (255.0 * 255.0),\n'+
+								'1.0 / (255.0 * 255.0 * 255.0));\n'+
+				'return dot(colour, bitShifts);\n'+
+			'}\n';
 };
 </pre>
         </article>
@@ -315,7 +339,7 @@ WebCLGLUtils.prototype.unpackGLSLFunctionString = function() {
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha2</a>
-		on Sat Oct 10 2015 12:24:44 GMT+0200 (CEST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Wed Oct 14 2015 12:21:58 GMT+0200 (CEST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
