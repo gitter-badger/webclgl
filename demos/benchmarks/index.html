@@ -40,9 +40,9 @@
 					B.push(randB);
 				}
 				
-				document.getElementById('DIVA').innerText = A;
-				document.getElementById('DIVB').innerText = B;
-				document.getElementById('DIVC_CPU').innerText = 'executing...';
+				document.getElementById('DIVA').appendChild(document.createTextNode(A));
+				document.getElementById('DIVB').appendChild(document.createTextNode(B));
+				document.getElementById('DIVC_CPU').appendChild(document.createTextNode('executing...'));
 				
 				setTimeout(function(){performCPU();}, 300);
 			};
@@ -59,12 +59,12 @@
 					C_CPU[n] = result;
 				}
 
-				document.getElementById('benchmarkCPU').innerText = (new Date().getTime()-dat)+'ms';
-				document.getElementById('DIVC_CPU').innerText = C_CPU;
+				document.getElementById('benchmarkCPU').appendChild(document.createTextNode((new Date().getTime()-dat)+'ms'));
+				document.getElementById('DIVC_CPU').appendChild(document.createTextNode(C_CPU));
 
 
 
-				document.getElementById('DIVC_GPU').innerText = 'executing...';				
+				document.getElementById('DIVC_GPU').appendChild(document.createTextNode('executing...'));				
 				setTimeout(function(){performGPU();}, 300);
 			};
 			
@@ -97,14 +97,14 @@
 				webCLGL.enqueueNDRangeKernel(kernel_add, buffer_C); // First execution: compile and exec; Last executions: only exec
 				var C_GPU = webCLGL.enqueueReadBuffer_Float(buffer_C);
 
-				document.getElementById('benchmarkGPU').innerText = (new Date().getTime()-dat)+'ms';
-				document.getElementById('DIVC_GPU').innerText = C_GPU;  
+				document.getElementById('benchmarkGPU').appendChild(document.createTextNode((new Date().getTime()-dat)+'ms'));
+				document.getElementById('DIVC_GPU').appendChild(document.createTextNode(Array.prototype.slice.call(C_GPU[0])));  
 			};
 			
 			
 			
-			document.getElementById('DIVA').innerText = 'fill array A...wait';
-			document.getElementById('DIVB').innerText = 'fill array B...wait';
+			document.getElementById('DIVA').appendChild(document.createTextNode('fill array A...wait'));
+			document.getElementById('DIVB').appendChild(document.createTextNode('fill array B...wait'));
 			setTimeout(function(){fillArrays();}, 300);
 			
 		</script>
