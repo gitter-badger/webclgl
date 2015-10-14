@@ -189,8 +189,8 @@ WebCLGL.prototype.copy = function(valueToRead, valueToWrite) {
 * @param {Int|Array<Float>} length Length of buffer or Array with width and height values if is for a WebGLTexture
 * @param {String} [type="FLOAT"] type FLOAT4 OR FLOAT
 * @param {Int} [offset=0] If 0 the range is from 0.0 to 1.0 else if >0 then the range is from -offset.0 to offset.0
-* @property {Bool} [linear=false] linear texParameteri type for the WebGLTexture
-* @property {String} [mode="FRAGMENT"] Mode for this buffer. "FRAGMENT", "VERTEX", "VERTEX_INDEX", "VERTEX_FROM_KERNEL", "VERTEX_AND_FRAGMENT" 
+* @param {Bool} [linear=false] linear texParameteri type for the WebGLTexture
+* @param {String} [mode="FRAGMENT"] Mode for this buffer. "FRAGMENT", "VERTEX", "VERTEX_INDEX", "VERTEX_FROM_KERNEL", "VERTEX_AND_FRAGMENT" 
 * @returns {WebCLGLBuffer} 
 */
 WebCLGL.prototype.createBuffer = function(length, type, offset, linear, mode) {
