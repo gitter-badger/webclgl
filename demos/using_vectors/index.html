@@ -9,6 +9,7 @@
    
     <script src="../../WebCLGLUtils.class.js"></script>
 	<script src="../../WebCLGLBuffer.class.js"></script>
+	<script src="../../WebCLGLBufferItem.class.js"></script>
 	<script src="../../WebCLGLKernel.class.js"></script>
 	<script src="../../WebCLGLKernelProgram.class.js"></script>
 	<script src="../../WebCLGL.class.js"></script>
@@ -58,7 +59,6 @@
 		  var kernel_add = webCLGL.createKernel(kernel_add_source);
 		  kernel_add.setKernelArg(0, buffer_A);
 		  kernel_add.setKernelArg(1, buffer_B);
-		  kernel_add.compile();
 		  
 		  webCLGL.enqueueNDRangeKernel(kernel_add, buffer_C); 
 		  
