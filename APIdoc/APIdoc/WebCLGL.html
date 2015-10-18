@@ -37,6 +37,10 @@
 						</li>
 						
 						<li>
+							<a href="WebCLGLBufferItem.html">WebCLGLBufferItem</a>
+						</li>
+						
+						<li>
 							<a href="WebCLGLKernel.html">WebCLGLKernel</a>
 						</li>
 						
@@ -399,7 +403,7 @@
 			
 				
 <dt>
-    <h4 class="name" id="createBuffer"><span class="type-signature"></span>createBuffer<span class="signature">(length, <span class="optional">type</span>, <span class="optional">offset</span>, <span class="optional">linear</span>, <span class="optional">mode</span>)</span><span class="type-signature"> &rarr; {<a href="WebCLGLBuffer.html">WebCLGLBuffer</a>}</span></h4>
+    <h4 class="name" id="createBuffer"><span class="type-signature"></span>createBuffer<span class="signature">(length, <span class="optional">type</span>, <span class="optional">offset</span>, <span class="optional">linear</span>, <span class="optional">mode</span>, <span class="optional">splits</span>)</span><span class="type-signature"> &rarr; {<a href="WebCLGLBuffer.html">WebCLGLBuffer</a>}</span></h4>
     
     
 </dt>
@@ -636,6 +640,45 @@
         </tr>
 
 	
+
+        <tr>
+            
+                <td class="name"><code>splits</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    [length]
+                
+                </td>
+            
+
+            <td class="description last"><p>Splits length for this buffer.</p></td>
+        </tr>
+
+	
 	</tbody>
 </table>
 
@@ -664,7 +707,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-196">line 196</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-202">line 202</a>
     </li></ul></dd>
     
 
@@ -862,7 +905,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-206">line 206</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-212">line 212</a>
     </li></ul></dd>
     
 
@@ -1138,7 +1181,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-219">line 219</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-225">line 225</a>
     </li></ul></dd>
     
 
@@ -1300,7 +1343,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-246">line 246</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-252">line 252</a>
     </li></ul></dd>
     
 
@@ -1444,7 +1487,7 @@ Read buffer in a specifics WebGL 32bit channel and return the data in one array 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-380">line 380</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-395">line 395</a>
     </li></ul></dd>
     
 
@@ -1493,7 +1536,7 @@ Read buffer in a specifics WebGL 32bit channel and return the data in one array 
 			
 				
 <dt>
-    <h4 class="name" id="enqueueReadBuffer_Float"><span class="type-signature"></span>enqueueReadBuffer_Float<span class="signature">(buffer)</span><span class="type-signature"> &rarr; {Array.&lt;Float32Array>}</span></h4>
+    <h4 class="name" id="enqueueReadBuffer_Float"><span class="type-signature"></span>enqueueReadBuffer_Float<span class="signature">(buffer)</span><span class="type-signature"> &rarr; {Array.&lt;Array>}</span></h4>
     
     
 </dt>
@@ -1502,7 +1545,7 @@ Read buffer in a specifics WebGL 32bit channel and return the data in one array 
     
     <div class="description">
         <p>Get 1 Float32Array array from a WebCLGLBuffer type FLOAT <br>
-Internally performs one calls to enqueueReadBuffer_Packet4Uint8Array_Float and makes unpacking</p>
+Internally performs one calls to enqueueReadBuffer and return the data in one array of one Float32Array</p>
     </div>
     
 
@@ -1584,7 +1627,7 @@ Internally performs one calls to enqueueReadBuffer_Packet4Uint8Array_Float and m
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-533">line 533</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-557">line 557</a>
     </li></ul></dd>
     
 
@@ -1616,7 +1659,7 @@ Internally performs one calls to enqueueReadBuffer_Packet4Uint8Array_Float and m
 	</dt>
 	<dd>
 		
-<span class="param-type">Array.&lt;Float32Array></span>
+<span class="param-type">Array.&lt;Array></span>
 
 
 	</dd>
@@ -1633,7 +1676,7 @@ Internally performs one calls to enqueueReadBuffer_Packet4Uint8Array_Float and m
 			
 				
 <dt>
-    <h4 class="name" id="enqueueReadBuffer_Float4"><span class="type-signature"></span>enqueueReadBuffer_Float4<span class="signature">(buffer)</span><span class="type-signature"> &rarr; {Array.&lt;Float32Array>}</span></h4>
+    <h4 class="name" id="enqueueReadBuffer_Float4"><span class="type-signature"></span>enqueueReadBuffer_Float4<span class="signature">(buffer)</span><span class="type-signature"> &rarr; {Array.&lt;Array>}</span></h4>
     
     
 </dt>
@@ -1642,7 +1685,7 @@ Internally performs one calls to enqueueReadBuffer_Packet4Uint8Array_Float and m
     
     <div class="description">
         <p>Get 4 Float32Array arrays from a WebCLGLBuffer type FLOAT4 <br>
-Internally performs one calls to enqueueReadBuffer_Packet4Uint8Array_Float4 and makes unpacking</p>
+Internally performs one calls to enqueueReadBuffer and return the data in one array of four Float32Array</p>
     </div>
     
 
@@ -1724,7 +1767,7 @@ Internally performs one calls to enqueueReadBuffer_Packet4Uint8Array_Float4 and 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-455">line 455</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-469">line 469</a>
     </li></ul></dd>
     
 
@@ -1756,7 +1799,7 @@ Internally performs one calls to enqueueReadBuffer_Packet4Uint8Array_Float4 and 
 	</dt>
 	<dd>
 		
-<span class="param-type">Array.&lt;Float32Array></span>
+<span class="param-type">Array.&lt;Array></span>
 
 
 	</dd>
@@ -1773,7 +1816,7 @@ Internally performs one calls to enqueueReadBuffer_Packet4Uint8Array_Float4 and 
 			
 				
 <dt>
-    <h4 class="name" id="enqueueReadBuffer_Packet4Uint8Array_Float"><span class="type-signature"></span>enqueueReadBuffer_Packet4Uint8Array_Float<span class="signature">(buffer)</span><span class="type-signature"> &rarr; {Array.&lt;Uint8Array>}</span></h4>
+    <h4 class="name" id="enqueueReadBuffer_Packet4Uint8Array_Float"><span class="type-signature"></span>enqueueReadBuffer_Packet4Uint8Array_Float<span class="signature">(buffer)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -1864,7 +1907,7 @@ Internally performs one call to enqueueReadBuffer and return the data in one arr
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-514">line 514</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-538">line 538</a>
     </li></ul></dd>
     
 
@@ -1885,25 +1928,6 @@ Internally performs one call to enqueueReadBuffer and return the data in one arr
     
     
     
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Array.&lt;Uint8Array></span>
-
-
-	</dd>
-</dl>
-
-
-        
     
     
         <h5>Example</h5>
@@ -1919,7 +1943,7 @@ Internally performs one call to enqueueReadBuffer and return the data in one arr
 			
 				
 <dt>
-    <h4 class="name" id="enqueueReadBuffer_Packet4Uint8Array_Float4"><span class="type-signature"></span>enqueueReadBuffer_Packet4Uint8Array_Float4<span class="signature">(buffer)</span><span class="type-signature"> &rarr; {Array.&lt;Uint8Array>}</span></h4>
+    <h4 class="name" id="enqueueReadBuffer_Packet4Uint8Array_Float4"><span class="type-signature"></span>enqueueReadBuffer_Packet4Uint8Array_Float4<span class="signature">(buffer)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -2010,7 +2034,7 @@ Internally performs four calls to enqueueReadBuffer and return the data in one a
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-433">line 433</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-447">line 447</a>
     </li></ul></dd>
     
 
@@ -2031,25 +2055,6 @@ Internally performs four calls to enqueueReadBuffer and return the data in one a
     
     
     
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Array.&lt;Uint8Array></span>
-
-
-	</dd>
-</dl>
-
-
-        
     
     
 </dd>
@@ -2100,7 +2105,7 @@ Internally performs four calls to enqueueReadBuffer and return the data in one a
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-369">line 369</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-384">line 384</a>
     </li></ul></dd>
     
 
@@ -2149,7 +2154,7 @@ Internally performs four calls to enqueueReadBuffer and return the data in one a
 			
 				
 <dt>
-    <h4 class="name" id="enqueueVertexFragmentProgram"><span class="type-signature"></span>enqueueVertexFragmentProgram<span class="signature">(webCLGLVertexFragmentProgram, webCLGLBuffer, length, <span class="optional">drawMode</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="enqueueVertexFragmentProgram"><span class="type-signature"></span>enqueueVertexFragmentProgram<span class="signature">(webCLGLVertexFragmentProgram, buffer, <span class="optional">drawMode</span>)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -2230,13 +2235,13 @@ Internally performs four calls to enqueueReadBuffer and return the data in one a
 
         <tr>
             
-                <td class="name"><code>webCLGLBuffer</code></td>
+                <td class="name"><code>buffer</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">webCLGLBuffer</span>
+<span class="param-type"><a href="WebCLGLBuffer.html">WebCLGLBuffer</a></span>
 
 
             
@@ -2258,42 +2263,7 @@ Internally performs four calls to enqueueReadBuffer and return the data in one a
                 </td>
             
 
-            <td class="description last"><p>Buffer of indices (Buffer mode &quot;VERTEX_INDEX&quot;)</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>length</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>Length of indices or array</p></td>
+            <td class="description last"><p>Buffer to draw type (type indices or vertex)</p></td>
         </tr>
 
 	
@@ -2364,7 +2334,7 @@ Internally performs four calls to enqueueReadBuffer and return the data in one a
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-290">line 290</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-299">line 299</a>
     </li></ul></dd>
     
 
@@ -2586,7 +2556,7 @@ Internally performs four calls to enqueueReadBuffer and return the data in one a
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-231">line 231</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-237">line 237</a>
     </li></ul></dd>
     
 
@@ -2674,7 +2644,7 @@ Internally performs four calls to enqueueReadBuffer and return the data in one a
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha2</a>
-		on Wed Oct 14 2015 12:28:44 GMT+0200 (CEST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Sun Oct 18 2015 18:35:41 GMT+0200 (CEST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
