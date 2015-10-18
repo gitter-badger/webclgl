@@ -21,7 +21,7 @@ Not 100% the same as the future <a href="https://en.wikipedia.org/wiki/WebCL">We
 <br />
 
 <h3>Changelog</h3>
-v2.2 (Oct 10, 2015) <br />
+v2.2 (Oct 18, 2015) <br />
 - Added new class WebCLGLBufferItem <br />
 - Added split option in buffers for allow internal big lengths <br />
 - Fixed minor bugs from last version <br />
