@@ -41,7 +41,10 @@ WebCLGLBuffer.prototype.writeWebGLTextureBuffer = function(arr, flip) {
 		var startItem = (i==0) ? 0 : this.splits[i-1]*m;
 		var endItem = startItem+(this.items[i].length*m);
 			
-		this.items[i].writeWebGLTextureBuffer(arr.slice(startItem, endItem), flip);
+		if(this.items.length > 1) 
+			this.items[i].writeWebGLTextureBuffer(arr.slice(startItem, endItem), flip);
+		else
+			this.items[i].writeWebGLTextureBuffer(arr, flip);
 	}
 };
 
@@ -57,7 +60,10 @@ WebCLGLBuffer.prototype.writeWebGLBuffer = function(arr, flip) {
 		var startItem = (i==0) ? 0 : this.splits[i-1]*m;
 		var endItem = startItem+(this.items[i].length*m);	
 		
-		this.items[i].writeWebGLBuffer(arr.slice(startItem, endItem), flip);
+		if(this.items.length > 1)
+			this.items[i].writeWebGLBuffer(arr.slice(startItem, endItem), flip);
+		else
+			this.items[i].writeWebGLBuffer(arr, flip);
 	}
 };
 

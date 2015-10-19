@@ -156,37 +156,43 @@ WebCLGL = function(webglcontext) {
 * webCLGL.copyTexture (TMPbuffer, ORIGINALbuffer);
 */
 WebCLGL.prototype.copy = function(valuesToRead, valuesToWrite) { 
-	for(var i=0; i < valuesToRead.items.length; i++) {
-		valueToRead = valuesToRead.items[i];
-		valueToWrite = valuesToWrite.items[i];
-		
-		if(valueToRead instanceof WebCLGLBufferItem) {
-			this.gl.viewport(0, 0, valueToWrite.W, valueToWrite.H);
-			this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, valueToWrite.fBuffer); 
-			this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, valueToWrite.textureData, 0);
-		} else
-			this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, valueToWrite, 0);
-		
-		
-		this.gl.useProgram(this.shader_copyTexture);
-		
-		this.gl.activeTexture(this.gl.TEXTURE0);
-		var toRead = (valueToRead instanceof WebGLTexture) ? valueToRead : valueToRead.textureData;
-		this.gl.bindTexture(this.gl.TEXTURE_2D, toRead);
-		this.gl.uniform1i(this.sampler_copyTexture_toSave, 0);				
-		
-		
-		this.gl.enableVertexAttribArray(this.attr_copyTexture_pos);
-		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer_QUAD);
-		this.gl.vertexAttribPointer(this.attr_copyTexture_pos, 3, this.gl.FLOAT, false, 0, 0);
-		
-		this.gl.enableVertexAttribArray(this.attr_copyTexture_tex);
-		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureBuffer_QUAD);
-		this.gl.vertexAttribPointer(this.attr_copyTexture_tex, 3, this.gl.FLOAT, false, 0, 0);
-		
-		this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer_QUAD);
-		this.gl.drawElements(this.gl.TRIANGLES, 6, this.gl.UNSIGNED_SHORT, 0);
-	}
+	if(valuesToRead instanceof WebCLGLBuffer) {
+		for(var i=0; i < valuesToRead.items.length; i++) {
+			valueToRead = valuesToRead.items[i];
+			valueToWrite = valuesToWrite.items[i];
+			
+			this.copyItem(valueToRead, valueToWrite);
+		}
+	} else if(valuesToRead instanceof WebGLTexture) // WebGLTexture 
+		this.copyItem(valuesToRead, valuesToWrite);
+};
+WebCLGL.prototype.copyItem = function(valueToRead, valueToWrite) {		
+	if(valueToRead instanceof WebCLGLBufferItem) {
+		this.gl.viewport(0, 0, valueToWrite.W, valueToWrite.H);
+		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, valueToWrite.fBuffer); 
+		this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, valueToWrite.textureData, 0);
+	} else if(valueToRead instanceof WebGLTexture)
+		this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, valueToWrite, 0);
+	
+	
+	this.gl.useProgram(this.shader_copyTexture);
+	
+	this.gl.activeTexture(this.gl.TEXTURE0);
+	var toRead = (valueToRead instanceof WebGLTexture) ? valueToRead : valueToRead.textureData;
+	this.gl.bindTexture(this.gl.TEXTURE_2D, toRead);
+	this.gl.uniform1i(this.sampler_copyTexture_toSave, 0);				
+	
+	
+	this.gl.enableVertexAttribArray(this.attr_copyTexture_pos);
+	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer_QUAD);
+	this.gl.vertexAttribPointer(this.attr_copyTexture_pos, 3, this.gl.FLOAT, false, 0, 0);
+	
+	this.gl.enableVertexAttribArray(this.attr_copyTexture_tex);
+	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureBuffer_QUAD);
+	this.gl.vertexAttribPointer(this.attr_copyTexture_tex, 3, this.gl.FLOAT, false, 0, 0);
+	
+	this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer_QUAD);
+	this.gl.drawElements(this.gl.TRIANGLES, 6, this.gl.UNSIGNED_SHORT, 0);
 };
 
 /**

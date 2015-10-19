@@ -15,18 +15,17 @@ Not 100% the same as the future <a href="https://en.wikipedia.org/wiki/WebCL">We
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/compare_values_with_other_ids/index.html"> Compare values with other ids</a><br />
 
 
-<h3><a href="https://rawgit.com/stormcolor/webclgl/master/APIdoc/APIdoc/WebCLGL.html">API Doc WebCLGL 2.0</a></h3>
+<h3><a href="https://rawgit.com/stormcolor/webclgl/master/APIdoc/APIdoc/WebCLGL.html">API Doc WebCLGL</a></h3>
 <h3><a href="http://www.khronos.org/files/webgl/webgl-reference-card-1_0.pdf">OpenGL ES Shading Language 1.0 Reference Card (Pag 3-4)</a></h3>
 <br />
 <br />
 
 <h3>Changelog</h3>
 v2.2 (Oct 18, 2015) <br />
-- Added new class WebCLGLBufferItem <br />
-- Added split option in buffers for allow internal big lengths <br />
+- Added class WebCLGLVertexFragmentProgram for use in WebGL visualizations. <br />
+- Added class WebCLGLBufferItem for new split option in buffers allowing internal big lengths <br />
 - Fixed minor bugs from last version <br />
 v2.1 (Oct 10, 2015) <br />
-- Added new class WebCLGLVertexFragmentProgram <br />
 - Fixed bug when enqueueReadBuffer FLOAT4 <br />
 - enqueueReadBuffer_Float4_Packet4Uint8Array renamed to enqueueReadBuffer_Packet4Uint8Array_Float4 <br />
 <br />
