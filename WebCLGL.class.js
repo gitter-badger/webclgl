@@ -234,6 +234,15 @@ WebCLGL.prototype.createVertexFragmentProgram = function(vertexSource, vertexHea
 };
 
 /**
+* Create work
+* @returns {WebCLGLWork} 
+*/
+WebCLGL.prototype.createWork = function(offset) {  
+	var webclglWork = new WebCLGLWork(this, offset);
+	return webclglWork;
+};
+
+/**
 * Write on buffer
 * @type Void
 * @param {WebCLGLBuffer} buffer
