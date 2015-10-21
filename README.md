@@ -14,7 +14,7 @@ Not 100% the same as the future <a href="https://en.wikipedia.org/wiki/WebCL">We
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/using_vectors_as_output/index.html"> Using vectors as output</a><br />
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/compare_values_with_other_ids/index.html"> Compare values with other ids</a><br />
 - <a href="#"> Handling several WebCLGLKernels with WebCLGLWork class</a> (coming soon)<br />
-- <a href="https://rawgit.com/stormcolor/webclgl/master/demos/WebCLGLWork_3D_graphics/index.html"> Graphic output with WebCLGLWork class using several WebCLGLKernels and a WebCLGLVertexFragmentProgram</a> (coming soon)<br />
+- <a href="https://rawgit.com/stormcolor/webclgl/master/demos/WebCLGLWork_3D_graphics/index.html"> Graphic output with WebCLGLWork class using several WebCLGLKernels and a WebCLGLVertexFragmentProgram</a> <br />
 
 
 <h3><a href="https://rawgit.com/stormcolor/webclgl/master/APIdoc/APIdoc/WebCLGL.html">API Doc WebCLGL</a></h3>
