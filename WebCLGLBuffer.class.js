@@ -17,9 +17,9 @@ WebCLGLBuffer = function(gl, length, type, offset, linear, mode, splits) {
 	var countArr = this.length;
 	currItem = 0;
 	while(true) {
-		if(countArr > this.splits[currItem]) {
-			this.items[currItem] = new WebCLGLBufferItem(gl, this.splits[currItem], type, offset, linear, mode);	
-			countArr -= this.splits[currItem];
+		if(countArr > this.splits[0]) {
+			this.items[currItem] = new WebCLGLBufferItem(gl, this.splits[0], type, offset, linear, mode);	
+			countArr -= this.splits[0];
 		} else {
 			this.items[currItem] = new WebCLGLBufferItem(gl, countArr, type, offset, linear, mode);
 			countArr -= countArr;
