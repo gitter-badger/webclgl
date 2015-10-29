@@ -62,7 +62,11 @@ WebCLGLVertexFragmentProgram.prototype.setVertexSource = function(vertexSource, 
 									name:argumentsSource[n].split('*')[1].trim()};
 			}
 		} else {
-			if(argumentsSource[n].match(/float/gm) != null) {
+			if(argumentsSource[n].match(/float4/gm) != null) {
+				this.in_vertex_values[n] = {value:undefined,
+									type:'float4',
+									name:argumentsSource[n].split(' ')[1].trim()};
+			} else if(argumentsSource[n].match(/float/gm) != null) {
 				this.in_vertex_values[n] = {value:undefined,
 									type:'float',
 									name:argumentsSource[n].split(' ')[1].trim()};
@@ -144,9 +148,17 @@ WebCLGLVertexFragmentProgram.prototype.setFragmentSource = function(fragmentSour
 									name:argumentsSource[n].split('*')[1].trim()};
 			}
 		} else {
-			if(argumentsSource[n].match(/float/gm) != null) {
+			if(argumentsSource[n].match(/float4/gm) != null) {
 				this.in_fragment_values[n] = {value:undefined,
-									type:'float',
+									type:'float4',
+									name:argumentsSource[n].split(' ')[1].trim()};
+			} else if(argumentsSource[n].match(/float/gm) != null) {
+				this.in_fragment_values[n] = {value:undefined,
+						type:'float',
+						name:argumentsSource[n].split(' ')[1].trim()};
+			} else if(argumentsSource[n].match(/mat4/gm) != null) {
+				this.in_fragment_values[n] = {value:undefined,
+									type:'mat4',
 									name:argumentsSource[n].split(' ')[1].trim()};
 			}
 		}
@@ -222,6 +234,8 @@ WebCLGLVertexFragmentProgram.prototype.compileVertexFragmentSource = function() 
 				str += 'attribute float '+this.in_vertex_values[n].name+';\n';
 			} else if(this.in_vertex_values[n].type == 'float') {
 				str += 'uniform float '+this.in_vertex_values[n].name+';\n';
+			} else if(this.in_vertex_values[n].type == 'float4') {
+				str += 'uniform vec4 '+this.in_vertex_values[n].name+';\n';
 			} else if(this.in_vertex_values[n].type == 'mat4') {
 				str += 'uniform mat4 '+this.in_vertex_values[n].name+';\n';
 			}
@@ -236,6 +250,10 @@ WebCLGLVertexFragmentProgram.prototype.compileVertexFragmentSource = function() 
 				str += 'uniform sampler2D '+this.in_fragment_values[n].name+';\n';
 			} else if(this.in_fragment_values[n].type == 'float') {
 				str += 'uniform float '+this.in_fragment_values[n].name+';\n';
+			} else if(this.in_fragment_values[n].type == 'float4') {
+				str += 'uniform vec4 '+this.in_fragment_values[n].name+';\n';
+			} else if(this.in_fragment_values[n].type == 'mat4') {
+				str += 'uniform mat4 '+this.in_fragment_values[n].name+';\n';
 			}
 		}
 		return str;
@@ -335,7 +353,7 @@ WebCLGLVertexFragmentProgram.prototype.compileVertexFragmentSource = function() 
 										type: this.in_vertex_values[n].type});
 			
 			this.in_vertex_values[n].idPointer = this.vertexAttributes.length-1;
-		} else if(this.in_vertex_values[n].type == 'float' || this.in_vertex_values[n].type == 'mat4') {
+		} else if(this.in_vertex_values[n].type == 'float' || this.in_vertex_values[n].type == 'float4' || this.in_vertex_values[n].type == 'mat4') {
 			this.vertexUniforms.push({location:[this.gl.getUniformLocation(this.vertexFragmentProgram, this.in_vertex_values[n].name)],
 										value:this.in_vertex_values[n].value,
 										type: this.in_vertex_values[n].type});
@@ -352,7 +370,7 @@ WebCLGLVertexFragmentProgram.prototype.compileVertexFragmentSource = function() 
 										type: this.in_fragment_values[n].type});
 			
 			this.in_fragment_values[n].idPointer = this.fragmentSamplers.length-1;
-		} else if(this.in_fragment_values[n].type == 'float') {
+		} else if(this.in_fragment_values[n].type == 'float' || this.in_fragment_values[n].type == 'float4' || this.in_fragment_values[n].type == 'mat4') {
 			this.fragmentUniforms.push({location:[this.gl.getUniformLocation(this.vertexFragmentProgram, this.in_fragment_values[n].name)],
 										value:this.in_fragment_values[n].value,
 										type: this.in_fragment_values[n].type});
@@ -397,7 +415,7 @@ WebCLGLVertexFragmentProgram.prototype.setVertexArg = function(argument, data) {
 		this.in_vertex_values[numArg].type == 'buffer_float4' ||
 		this.in_vertex_values[numArg].type == 'buffer_float') {
 		this.vertexAttributes[this.in_vertex_values[numArg].idPointer].value = this.in_vertex_values[numArg].value;
-	} else if(this.in_vertex_values[numArg].type == 'float' || this.in_vertex_values[numArg].type == 'mat4') {
+	} else if(this.in_vertex_values[numArg].type == 'float' || this.in_vertex_values[numArg].type == 'float4' || this.in_vertex_values[numArg].type == 'mat4') {
 		this.vertexUniforms[this.in_vertex_values[numArg].idPointer].value = this.in_vertex_values[numArg].value;	
 	}
 };
@@ -430,7 +448,7 @@ WebCLGLVertexFragmentProgram.prototype.setFragmentArg = function(argument, data)
 	
 	if(this.in_fragment_values[numArg].type == 'buffer_float4' || this.in_fragment_values[numArg].type == 'buffer_float') {
 		this.fragmentSamplers[this.in_fragment_values[numArg].idPointer].value = this.in_fragment_values[numArg].value;
-	} else if(this.in_fragment_values[numArg].type == 'float') {
+	} else if(this.in_fragment_values[numArg].type == 'float' || this.in_fragment_values[numArg].type == 'float4' || this.in_fragment_values[numArg].type == 'mat4') {
 		this.fragmentUniforms[this.in_fragment_values[numArg].idPointer].value = this.in_fragment_values[numArg].value;			
 	}
 };

@@ -335,7 +335,16 @@ WebCLGL.prototype.enqueueVertexFragmentProgram = function(webCLGLVertexFragmentP
 			currentTextureUnit++;
 		}	
 		for(var n = 0, f = webCLGLVertexFragmentProgram.fragmentUniforms.length; n < f; n++) {
-			this.gl.uniform1f(webCLGLVertexFragmentProgram.fragmentUniforms[n].location[0], webCLGLVertexFragmentProgram.fragmentUniforms[n].value);
+			if(webCLGLVertexFragmentProgram.fragmentUniforms[n].type == 'float') {
+				this.gl.uniform1f(webCLGLVertexFragmentProgram.fragmentUniforms[n].location[0], webCLGLVertexFragmentProgram.fragmentUniforms[n].value);
+			} else if(webCLGLVertexFragmentProgram.fragmentUniforms[n].type == 'float4') {
+				this.gl.uniform4f(webCLGLVertexFragmentProgram.fragmentUniforms[n].location[0], webCLGLVertexFragmentProgram.fragmentUniforms[n].value[0],
+																								webCLGLVertexFragmentProgram.fragmentUniforms[n].value[1],
+																								webCLGLVertexFragmentProgram.fragmentUniforms[n].value[2],
+																								webCLGLVertexFragmentProgram.fragmentUniforms[n].value[3]);
+			} else if(webCLGLVertexFragmentProgram.fragmentUniforms[n].type == 'mat4') {
+				this.gl.uniformMatrix4fv(webCLGLVertexFragmentProgram.fragmentUniforms[n].location[0], false, webCLGLVertexFragmentProgram.fragmentUniforms[n].value);
+			}
 		}
 		this.gl.uniform1f(webCLGLVertexFragmentProgram.uOffset, bufferItem.offset);
 		
@@ -378,6 +387,11 @@ WebCLGL.prototype.enqueueVertexFragmentProgram = function(webCLGLVertexFragmentP
 		for(var n = 0, f = webCLGLVertexFragmentProgram.vertexUniforms.length; n < f; n++) {
 			if(webCLGLVertexFragmentProgram.vertexUniforms[n].type == 'float') {
 				this.gl.uniform1f(webCLGLVertexFragmentProgram.vertexUniforms[n].location[0], webCLGLVertexFragmentProgram.vertexUniforms[n].value);
+			} else if(webCLGLVertexFragmentProgram.vertexUniforms[n].type == 'float4') {
+				this.gl.uniform4f(webCLGLVertexFragmentProgram.vertexUniforms[n].location[0], webCLGLVertexFragmentProgram.vertexUniforms[n].value[0],
+																							webCLGLVertexFragmentProgram.vertexUniforms[n].value[1],
+																							webCLGLVertexFragmentProgram.vertexUniforms[n].value[2],
+																							webCLGLVertexFragmentProgram.vertexUniforms[n].value[3]);
 			} else if(webCLGLVertexFragmentProgram.vertexUniforms[n].type == 'mat4') {
 				this.gl.uniformMatrix4fv(webCLGLVertexFragmentProgram.vertexUniforms[n].location[0], false, webCLGLVertexFragmentProgram.vertexUniforms[n].value);
 			}
