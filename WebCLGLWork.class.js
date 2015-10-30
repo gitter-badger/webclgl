@@ -49,6 +49,7 @@ WebCLGLWork.prototype.getKernel = function(argument) {
 /**
 * Add one WebCLGLVertexFragmentProgram to the work
 * @param {WebCLGLVertexFragmentProgram} vertexFragmentProgram
+* @param {String} name Name for identify this vertexFragmentProgram
 * @type Void
  */
 WebCLGLWork.prototype.addVertexFragmentProgram = function(vertexFragmentProgram, name) {
@@ -224,7 +225,7 @@ WebCLGLWork.prototype.enqueueNDRangeKernel = function() {
 /**
 * Process VertexFragmentProgram
 * @param {String} [argument=undefined] Argument for vertices count or undefined if indices exist
-* @param {String} vertexFragmentProgramName Name of vertexFragmentProgram
+* @param {String} vertexFragmentProgramName Name of vertexFragmentProgram to execute
 * @param {Function} beforerender onBeforeRender function
 * @param {Int} drawMode
 * @type Void
