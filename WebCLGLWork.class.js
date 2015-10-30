@@ -8,7 +8,7 @@ WebCLGLWork = function(webCLGL, offset) {
 	this.offset = (offset != undefined) ? offset : 100.0;
 	
 	this.kernels = [];
-	this.vertexFragmentProgram;
+	this.vertexFragmentPrograms = {};
 	this.buffers = {};
 	this.buffers_TEMP = {};
 };
@@ -20,15 +20,15 @@ WebCLGLWork = function(webCLGL, offset) {
 * @type Void
  */
 WebCLGLWork.prototype.addKernel = function(kernel, argument) {  
-	var kernelExists = false;
+	var exists = false;
 	for(var n=0; n < this.kernels.length; n++) {
 		if(this.kernels[n] == kernel) {
 			this.kernels[n] = {"kernel": kernel, "argumentToUpdate": argument};
-			kernelExists = true;
+			exists = true;
 			break;
 		}
 	}
-	if(kernelExists == false) {
+	if(exists == false) {
 		this.kernels.push({"kernel": kernel, "argumentToUpdate": argument});
 	}
 };
@@ -51,8 +51,18 @@ WebCLGLWork.prototype.getKernel = function(argument) {
 * @param {WebCLGLVertexFragmentProgram} vertexFragmentProgram
 * @type Void
  */
-WebCLGLWork.prototype.addVertexFragmentProgram = function(vertexFragmentProgram) {  
-	this.vertexFragmentProgram = vertexFragmentProgram;
+WebCLGLWork.prototype.addVertexFragmentProgram = function(vertexFragmentProgram, name) {
+	var exists = false;
+	for(var key in this.vertexFragmentPrograms) {
+		if(this.vertexFragmentPrograms[key] == vertexFragmentProgram) {
+			this.vertexFragmentPrograms[key] = vertexFragmentProgram;
+			exists = true;
+			break;
+		}
+	}
+	if(exists == false) {
+		this.vertexFragmentPrograms[name] = vertexFragmentProgram;
+	}
 };
 
 /**
@@ -64,6 +74,8 @@ WebCLGLWork.prototype.addVertexFragmentProgram = function(vertexFragmentProgram)
  */
 WebCLGLWork.prototype.setArg = function(argument, value, splits) {	
 	var kernelPr = [];
+	var vPr = [];
+	var fPr = [];
 	var updatedFromKernel = false;
 	var type; // FLOAT or FLOAT4
 	var isBuffer = false;
@@ -94,9 +106,9 @@ WebCLGLWork.prototype.setArg = function(argument, value, splits) {
 	}
 	
 	
-	if(this.vertexFragmentProgram != undefined) {	
-		for(var nb=0; nb < this.vertexFragmentProgram.in_vertex_values.length; nb++) {
-			var inValues = this.vertexFragmentProgram.in_vertex_values[nb];
+	for(var key in this.vertexFragmentPrograms) {	
+		for(var nb=0; nb < this.vertexFragmentPrograms[key].in_vertex_values.length; nb++) {
+			var inValues = this.vertexFragmentPrograms[key].in_vertex_values[nb];
 			if(inValues.name == argument) {
 				if(inValues.type == "buffer_float4_fromKernel" || inValues.type == "buffer_float4") {
 					type = "FLOAT4";
@@ -106,13 +118,14 @@ WebCLGLWork.prototype.setArg = function(argument, value, splits) {
 					isBuffer = true;
 				}
 				
+				vPr.push(this.vertexFragmentPrograms[key]);
 				usedInVertex = true;
 				break;
 			}
 		}
 	
-		for(var nb=0; nb < this.vertexFragmentProgram.in_fragment_values.length; nb++) {
-			var inValues = this.vertexFragmentProgram.in_fragment_values[nb];
+		for(var nb=0; nb < this.vertexFragmentPrograms[key].in_fragment_values.length; nb++) {
+			var inValues = this.vertexFragmentPrograms[key].in_fragment_values[nb];
 			if(inValues.name == argument) {
 				if(inValues.type == "buffer_float4") {
 					type = "FLOAT4";
@@ -122,6 +135,7 @@ WebCLGLWork.prototype.setArg = function(argument, value, splits) {
 					isBuffer = true;
 				}
 				
+				fPr.push(this.vertexFragmentPrograms[key]);
 				usedInFragment = true;
 				break;
 			}
@@ -153,29 +167,24 @@ WebCLGLWork.prototype.setArg = function(argument, value, splits) {
 			this.buffers_TEMP[argument] = buffTMP;
 		}
 		
-		if(kernelPr.length > 0) {
-			for(var n=0; n < kernelPr.length; n++) {
-				kernelPr[n].setKernelArg(argument, this.buffers[argument]);
-			}
-		}
-		if(usedInVertex == true) 
-			this.vertexFragmentProgram.setVertexArg(argument, this.buffers[argument]);
 		
-		if(usedInFragment == true) 
-			this.vertexFragmentProgram.setFragmentArg(argument, this.buffers[argument]);
+		for(var n=0; n < kernelPr.length; n++)
+			kernelPr[n].setKernelArg(argument, this.buffers[argument]);
 		
+		for(var n=0; n < vPr.length; n++)
+			vPr[n].setVertexArg(argument, this.buffers[argument]);
+		
+		for(var n=0; n < fPr.length; n++)
+			fPr[n].setFragmentArg(argument, this.buffers[argument]);
 	} else {
-		if(kernelPr.length > 0) {
-			for(var n=0; n < kernelPr.length; n++) {
-				kernelPr[n].setKernelArg(argument, value);
-			}
-		}
-		if(usedInVertex == true) 
-			this.vertexFragmentProgram.setVertexArg(argument, value);
+		for(var n=0; n < kernelPr.length; n++)
+			kernelPr[n].setKernelArg(argument, value);
 		
-		if(usedInFragment == true) 
-			this.vertexFragmentProgram.setFragmentArg(argument, value);
+		for(var n=0; n < vPr.length; n++)
+			vPr[n].setVertexArg(argument, value);
 		
+		for(var n=0; n < fPr.length; n++) 
+			fPr[n].setFragmentArg(argument, value);
 	}	
 };
 
@@ -201,10 +210,10 @@ WebCLGLWork.prototype.enqueueNDRangeKernel = function() {
 	
 	for(var n=0; n < this.kernels.length; n++) 
 		this.webCLGL.copy(this.buffers_TEMP[this.kernels[n].argumentToUpdate], this.buffers[this.kernels[n].argumentToUpdate]);	
-		
-	if(this.vertexFragmentProgram != undefined) {	
-		for(var nb=0; nb < this.vertexFragmentProgram.in_vertex_values.length; nb++) {
-			var inValues = this.vertexFragmentProgram.in_vertex_values[nb];
+	
+	for(var key in this.vertexFragmentPrograms) {
+		for(var nb=0; nb < this.vertexFragmentPrograms[key].in_vertex_values.length; nb++) {
+			var inValues = this.vertexFragmentPrograms[key].in_vertex_values[nb];
 			if(inValues.type == "buffer_float4_fromKernel" || inValues.type == "buffer_float_fromKernel") {
 				this.webCLGL.enqueueReadBuffer_Packet4Uint8Array_Float4(this.buffers[inValues.name]); 
 			}
@@ -215,15 +224,18 @@ WebCLGLWork.prototype.enqueueNDRangeKernel = function() {
 /**
 * Process VertexFragmentProgram
 * @param {String} [argument=undefined] Argument for vertices count or undefined if indices exist
+* @param {String} vertexFragmentProgramName Name of vertexFragmentProgram
+* @param {Function} beforerender onBeforeRender function
+* @param {Int} drawMode
 * @type Void
  */
-WebCLGLWork.prototype.enqueueVertexFragmentProgram = function(argument, beforerender, drawMode) {  
+WebCLGLWork.prototype.enqueueVertexFragmentProgram = function(argument, vertexFragmentProgramName, beforerender, drawMode) {  
 	beforerender();
 	
 	if(this.CLGL_bufferIndices != undefined)
-		this.webCLGL.enqueueVertexFragmentProgram(this.vertexFragmentProgram, this.CLGL_bufferIndices, drawMode); 
+		this.webCLGL.enqueueVertexFragmentProgram(this.vertexFragmentPrograms[vertexFragmentProgramName], this.CLGL_bufferIndices, drawMode); 
 	else {
 		var buff = this.buffers[argument];
-		this.webCLGL.enqueueVertexFragmentProgram(this.vertexFragmentProgram, buff, drawMode);
+		this.webCLGL.enqueueVertexFragmentProgram(this.vertexFragmentPrograms[vertexFragmentProgramName], buff, drawMode);
 	}
 };
