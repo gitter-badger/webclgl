@@ -156,7 +156,7 @@
 		clglWorkernel_direction_nodes.setKernelSource(str_dir);
 		
 		// ADD TO WEBCLGL WORK
-		clglWork.addVertexFragmentProgram(clglWorvfProgram_nodes);
+		clglWork.addVertexFragmentProgram(clglWorvfProgram_nodes, "vertexFragmentProgram1");
 		clglWork.addKernel(clglWorkernel_positionByDirection_nodes, "posXYZW");
 		clglWork.addKernel(clglWorkernel_direction_nodes, "dir");
 		
@@ -265,7 +265,7 @@
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 			
-			clglWork.enqueueVertexFragmentProgram("posXYZW", function() {
+			clglWork.enqueueVertexFragmentProgram("posXYZW", "vertexFragmentProgram1", function() {
 				gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 				
 				clglWork.setArg("PMatrix", transpose(getProyection()));
