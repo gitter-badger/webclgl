@@ -266,6 +266,8 @@
 			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 			
 			clglWork.enqueueVertexFragmentProgram("posXYZW", function() {
+				gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+				
 				clglWork.setArg("PMatrix", transpose(getProyection()));
 				clglWork.setArg("cameraWMatrix", transpose(new Float32Array([	1.0, 0.0, 0.0, 0.0,
 																				0.0, 1.0, 0.0, 0.0,

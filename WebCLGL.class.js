@@ -314,8 +314,6 @@ WebCLGL.prototype.enqueueNDRangeKernel = function(webCLGLKernel, webCLGLBuffers)
 WebCLGL.prototype.enqueueVertexFragmentProgram = function(webCLGLVertexFragmentProgram, buffer, drawMode) {
 	var Dmode = (drawMode != undefined) ? drawMode : 4;
 	
-	this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
-	
 	this.gl.useProgram(webCLGLVertexFragmentProgram.vertexFragmentProgram);
 	for(var i=0; i < webCLGLVertexFragmentProgram.vertexAttributes[0].value.items.length; i++) {
 		var bufferItem = webCLGLVertexFragmentProgram.vertexAttributes[0].value.items[i];
