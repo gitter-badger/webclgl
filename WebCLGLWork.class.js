@@ -69,7 +69,7 @@ WebCLGLWork.prototype.addVertexFragmentProgram = function(vertexFragmentProgram,
 /**
 * Assign value of a argument for all added Kernels and vertexFragmentProgram
 * @param {String} argument Argument to set
-* @param {Array<Float>|Float} value
+* @param {Array<Float>|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement} value
 * @param {Array<Float>} [splits=[array.length]]
 * @type Void
  */
@@ -156,7 +156,7 @@ WebCLGLWork.prototype.setArg = function(argument, value, splits) {
 			mode = "FRAGMENT";
 		}
 		
-		var length = (type == "FLOAT4") ? value.length/4 : value.length;
+		var length = (value instanceof HTMLImageElement) ? (value.width*value.height) : ((type == "FLOAT4") ? value.length/4 : value.length);
 		var spl = (splits != undefined) ? splits : [length];
 		
 		buff = this.webCLGL.createBuffer(length, type, this.offset, false, mode, spl);
