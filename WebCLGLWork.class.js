@@ -16,7 +16,7 @@ WebCLGLWork = function(webCLGL, offset) {
 /**
 * Add one WebCLGLKernel to the work
 * @param {WebCLGLKernel} kernel
-* @param {String} argument Save the result in this argument
+* @param {String} [argument=undefined] Save the result in this argument or output in default framebuffer
 * @type Void
  */
 WebCLGLWork.prototype.addKernel = function(kernel, argument) {  
@@ -206,12 +206,16 @@ WebCLGLWork.prototype.setIndices = function(arr, splits) {
 * @type Void
  */
 WebCLGLWork.prototype.enqueueNDRangeKernel = function() {  
-	for(var n=0; n < this.kernels.length; n++) 
-		this.webCLGL.enqueueNDRangeKernel(this.kernels[n].kernel, this.buffers_TEMP[this.kernels[n].argumentToUpdate]);
-	
-	for(var n=0; n < this.kernels.length; n++) 
-		this.webCLGL.copy(this.buffers_TEMP[this.kernels[n].argumentToUpdate], this.buffers[this.kernels[n].argumentToUpdate]);	
-	
+	for(var n=0; n < this.kernels.length; n++) { 
+		if(this.kernels[n].argumentToUpdate != undefined)
+			this.webCLGL.enqueueNDRangeKernel(this.kernels[n].kernel, this.buffers_TEMP[this.kernels[n].argumentToUpdate]);
+		else 
+			this.webCLGL.enqueueNDRangeKernel(this.kernels[n].kernel);
+	}
+	for(var n=0; n < this.kernels.length; n++) {
+		if(this.kernels[n].argumentToUpdate != undefined)
+			this.webCLGL.copy(this.buffers_TEMP[this.kernels[n].argumentToUpdate], this.buffers[this.kernels[n].argumentToUpdate]);	
+	}
 	for(var key in this.vertexFragmentPrograms) {
 		for(var nb=0; nb < this.vertexFragmentPrograms[key].in_vertex_values.length; nb++) {
 			var inValues = this.vertexFragmentPrograms[key].in_vertex_values[nb];
