@@ -4,7 +4,7 @@
 * @constructor
 * @property {Float} length
 */
-WebCLGLBuffer = function(gl, length, type, offset, linear, mode, splits) {
+function WebCLGLBuffer(gl, length, type, offset, linear, mode, splits) {
 	this.gl = gl;
 	this.length = (length instanceof Array) ? length[0]*length[1] : length;
 	this.type = type;

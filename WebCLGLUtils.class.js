@@ -3,7 +3,7 @@
 * @class
 * @constructor
 */
-WebCLGLUtils = function() { 
+function WebCLGLUtils() { 
 	
 };
 
