@@ -27,7 +27,7 @@ THE SOFTWARE.
 * @constructor
 * @param {WebGLRenderingContext} [webglcontext=undefined] your WebGLRenderingContext
 */
-WebCLGL = function(webglcontext) { 
+function WebCLGL(webglcontext) { 
 	this.utils = new WebCLGLUtils();
 	
 	// WEBGL CONTEXT
@@ -328,91 +328,115 @@ WebCLGL.prototype.enqueueVertexFragmentProgram = function(webCLGLVertexFragmentP
 	var Dmode = (drawMode != undefined) ? drawMode : 4;
 	
 	this.gl.useProgram(webCLGLVertexFragmentProgram.vertexFragmentProgram);
-	for(var i=0; i < webCLGLVertexFragmentProgram.vertexAttributes[0].value.items.length; i++) {
-		var bufferItem = webCLGLVertexFragmentProgram.vertexAttributes[0].value.items[i];
-		
-		  
-		
-		var currentTextureUnit = 0;
-		for(var n = 0, f = webCLGLVertexFragmentProgram.fragmentSamplers.length; n < f; n++) {
-			if(currentTextureUnit < 16)
-				this.gl.activeTexture(this.gl["TEXTURE"+currentTextureUnit]);
-			else
-				this.gl.activeTexture(this.gl["TEXTURE16"]);
+	if(webCLGLVertexFragmentProgram.vertexAttributes[0].value != undefined) {
+		for(var i=0; i < webCLGLVertexFragmentProgram.vertexAttributes[0].value.items.length; i++) {
+			var bufferItem = webCLGLVertexFragmentProgram.vertexAttributes[0].value.items[i];
 			
-			this.gl.bindTexture(this.gl.TEXTURE_2D, webCLGLVertexFragmentProgram.fragmentSamplers[n].value.items[i].textureData);
-			this.gl.uniform1i(webCLGLVertexFragmentProgram.fragmentSamplers[n].location[0], currentTextureUnit);
+			  
 			
-			currentTextureUnit++;
-		}	
-		for(var n = 0, f = webCLGLVertexFragmentProgram.fragmentUniforms.length; n < f; n++) {
-			if(webCLGLVertexFragmentProgram.fragmentUniforms[n].type == 'float') {
-				this.gl.uniform1f(webCLGLVertexFragmentProgram.fragmentUniforms[n].location[0], webCLGLVertexFragmentProgram.fragmentUniforms[n].value);
-			} else if(webCLGLVertexFragmentProgram.fragmentUniforms[n].type == 'float4') {
-				this.gl.uniform4f(webCLGLVertexFragmentProgram.fragmentUniforms[n].location[0], webCLGLVertexFragmentProgram.fragmentUniforms[n].value[0],
-																								webCLGLVertexFragmentProgram.fragmentUniforms[n].value[1],
-																								webCLGLVertexFragmentProgram.fragmentUniforms[n].value[2],
-																								webCLGLVertexFragmentProgram.fragmentUniforms[n].value[3]);
-			} else if(webCLGLVertexFragmentProgram.fragmentUniforms[n].type == 'mat4') {
-				this.gl.uniformMatrix4fv(webCLGLVertexFragmentProgram.fragmentUniforms[n].location[0], false, webCLGLVertexFragmentProgram.fragmentUniforms[n].value);
+			var currentTextureUnit = 0;
+			for(var n = 0, f = webCLGLVertexFragmentProgram.fragmentSamplers.length; n < f; n++) {
+				if(webCLGLVertexFragmentProgram.fragmentSamplers[n].value != undefined) {
+					if(currentTextureUnit < 16)
+						this.gl.activeTexture(this.gl["TEXTURE"+currentTextureUnit]);
+					else
+						this.gl.activeTexture(this.gl["TEXTURE16"]);
+					
+					this.gl.bindTexture(this.gl.TEXTURE_2D, webCLGLVertexFragmentProgram.fragmentSamplers[n].value.items[i].textureData);
+					this.gl.uniform1i(webCLGLVertexFragmentProgram.fragmentSamplers[n].location[0], currentTextureUnit);					
+				} else {					
+					this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+				}
+				currentTextureUnit++;
+			}	
+			for(var n = 0, f = webCLGLVertexFragmentProgram.fragmentUniforms.length; n < f; n++) {
+				if(webCLGLVertexFragmentProgram.fragmentUniforms[n].value != undefined) {
+					if(webCLGLVertexFragmentProgram.fragmentUniforms[n].type == 'float') {
+						this.gl.uniform1f(webCLGLVertexFragmentProgram.fragmentUniforms[n].location[0], webCLGLVertexFragmentProgram.fragmentUniforms[n].value);
+					} else if(webCLGLVertexFragmentProgram.fragmentUniforms[n].type == 'float4') {
+						this.gl.uniform4f(webCLGLVertexFragmentProgram.fragmentUniforms[n].location[0], webCLGLVertexFragmentProgram.fragmentUniforms[n].value[0],
+																										webCLGLVertexFragmentProgram.fragmentUniforms[n].value[1],
+																										webCLGLVertexFragmentProgram.fragmentUniforms[n].value[2],
+																										webCLGLVertexFragmentProgram.fragmentUniforms[n].value[3]);
+					} else if(webCLGLVertexFragmentProgram.fragmentUniforms[n].type == 'mat4') {
+						this.gl.uniformMatrix4fv(webCLGLVertexFragmentProgram.fragmentUniforms[n].location[0], false, webCLGLVertexFragmentProgram.fragmentUniforms[n].value);
+					}
+				}
 			}
-		}
-		this.gl.uniform1f(webCLGLVertexFragmentProgram.uOffset, bufferItem.offset);
-		
-		for(var n = 0, f = webCLGLVertexFragmentProgram.vertexAttributes.length; n < f; n++) {
-			if(webCLGLVertexFragmentProgram.vertexAttributes[n].type == 'buffer_float4_fromKernel') {
-				this.gl.enableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0]);
-				this.gl.bindBuffer(this.gl.ARRAY_BUFFER, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].vertexData0);
-				this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].Packet4Uint8Array_Float4[0]); 
-				this.gl.vertexAttribPointer(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0], 4, this.gl.UNSIGNED_BYTE, true, 0, 0); // NORMALIZE!! 
-				
-				this.gl.enableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[1]);
-				this.gl.bindBuffer(this.gl.ARRAY_BUFFER, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].vertexData1);
-				this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].Packet4Uint8Array_Float4[1]);
-				this.gl.vertexAttribPointer(webCLGLVertexFragmentProgram.vertexAttributes[n].location[1], 4, this.gl.UNSIGNED_BYTE, true, 0, 0); // NORMALIZE!! 
-				
-				this.gl.enableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[2]);
-				this.gl.bindBuffer(this.gl.ARRAY_BUFFER, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].vertexData2);
-				this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].Packet4Uint8Array_Float4[2]);
-				this.gl.vertexAttribPointer(webCLGLVertexFragmentProgram.vertexAttributes[n].location[2], 4, this.gl.UNSIGNED_BYTE, true, 0, 0); // NORMALIZE!! 
-				
-				this.gl.enableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[3]);
-				this.gl.bindBuffer(this.gl.ARRAY_BUFFER, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].vertexData3);
-				this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].Packet4Uint8Array_Float4[3]);
-				this.gl.vertexAttribPointer(webCLGLVertexFragmentProgram.vertexAttributes[n].location[3], 4, this.gl.UNSIGNED_BYTE, true, 0, 0); // NORMALIZE!! 
-			} else if(webCLGLVertexFragmentProgram.vertexAttributes[n].type == 'buffer_float_fromKernel') {
-				this.gl.enableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0]);
-				this.gl.bindBuffer(this.gl.ARRAY_BUFFER, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].vertexData0);
-				this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].Packet4Uint8Array_Float[0]); 
-				this.gl.vertexAttribPointer(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0], 4, this.gl.UNSIGNED_BYTE, true, 0, 0); // NORMALIZE!! 
-			} else if(webCLGLVertexFragmentProgram.vertexAttributes[n].type == 'buffer_float4') {
-				this.gl.enableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0]);
-				this.gl.bindBuffer(this.gl.ARRAY_BUFFER, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].vertexData0);
-				this.gl.vertexAttribPointer(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0], 4, this.gl.FLOAT, false, 0, 0);
-			} else if(webCLGLVertexFragmentProgram.vertexAttributes[n].type == 'buffer_float') {
-				this.gl.enableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0]);
-				this.gl.bindBuffer(this.gl.ARRAY_BUFFER, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].vertexData0);
-				this.gl.vertexAttribPointer(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0], 1, this.gl.FLOAT, false, 0, 0);
+			this.gl.uniform1f(webCLGLVertexFragmentProgram.uOffset, bufferItem.offset);
+			
+			for(var n = 0, f = webCLGLVertexFragmentProgram.vertexAttributes.length; n < f; n++) {
+				if(webCLGLVertexFragmentProgram.vertexAttributes[n].value != undefined) {
+					if(webCLGLVertexFragmentProgram.vertexAttributes[n].type == 'buffer_float4_fromKernel') {
+						this.gl.enableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0]);
+						this.gl.bindBuffer(this.gl.ARRAY_BUFFER, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].vertexData0);
+						this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].Packet4Uint8Array_Float4[0]); 
+						this.gl.vertexAttribPointer(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0], 4, this.gl.UNSIGNED_BYTE, true, 0, 0); // NORMALIZE!! 
+						
+						this.gl.enableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[1]);
+						this.gl.bindBuffer(this.gl.ARRAY_BUFFER, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].vertexData1);
+						this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].Packet4Uint8Array_Float4[1]);
+						this.gl.vertexAttribPointer(webCLGLVertexFragmentProgram.vertexAttributes[n].location[1], 4, this.gl.UNSIGNED_BYTE, true, 0, 0); // NORMALIZE!! 
+						
+						this.gl.enableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[2]);
+						this.gl.bindBuffer(this.gl.ARRAY_BUFFER, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].vertexData2);
+						this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].Packet4Uint8Array_Float4[2]);
+						this.gl.vertexAttribPointer(webCLGLVertexFragmentProgram.vertexAttributes[n].location[2], 4, this.gl.UNSIGNED_BYTE, true, 0, 0); // NORMALIZE!! 
+						
+						this.gl.enableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[3]);
+						this.gl.bindBuffer(this.gl.ARRAY_BUFFER, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].vertexData3);
+						this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].Packet4Uint8Array_Float4[3]);
+						this.gl.vertexAttribPointer(webCLGLVertexFragmentProgram.vertexAttributes[n].location[3], 4, this.gl.UNSIGNED_BYTE, true, 0, 0); // NORMALIZE!! 
+					} else if(webCLGLVertexFragmentProgram.vertexAttributes[n].type == 'buffer_float_fromKernel') {
+						this.gl.enableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0]);
+						this.gl.bindBuffer(this.gl.ARRAY_BUFFER, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].vertexData0);
+						this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].Packet4Uint8Array_Float[0]); 
+						this.gl.vertexAttribPointer(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0], 4, this.gl.UNSIGNED_BYTE, true, 0, 0); // NORMALIZE!! 
+					} else if(webCLGLVertexFragmentProgram.vertexAttributes[n].type == 'buffer_float4') {
+						this.gl.enableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0]);
+						this.gl.bindBuffer(this.gl.ARRAY_BUFFER, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].vertexData0);
+						this.gl.vertexAttribPointer(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0], 4, this.gl.FLOAT, false, 0, 0);
+					} else if(webCLGLVertexFragmentProgram.vertexAttributes[n].type == 'buffer_float') {
+						this.gl.enableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0]);
+						this.gl.bindBuffer(this.gl.ARRAY_BUFFER, webCLGLVertexFragmentProgram.vertexAttributes[n].value.items[i].vertexData0);
+						this.gl.vertexAttribPointer(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0], 1, this.gl.FLOAT, false, 0, 0);
+					}
+				} else {
+					if(webCLGLVertexFragmentProgram.vertexAttributes[n].type == 'buffer_float4_fromKernel') {
+						this.gl.disableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0]);						
+						this.gl.disableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[1]);						
+						this.gl.disableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[2]);						
+						this.gl.disableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[3]);
+					} else if(webCLGLVertexFragmentProgram.vertexAttributes[n].type == 'buffer_float_fromKernel') {
+						this.gl.disableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0]);
+					} else if(webCLGLVertexFragmentProgram.vertexAttributes[n].type == 'buffer_float4') {
+						this.gl.disableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0]);
+					} else if(webCLGLVertexFragmentProgram.vertexAttributes[n].type == 'buffer_float') {
+						this.gl.disableVertexAttribArray(webCLGLVertexFragmentProgram.vertexAttributes[n].location[0]);
+					}
+				}
 			}
-		}
-		for(var n = 0, f = webCLGLVertexFragmentProgram.vertexUniforms.length; n < f; n++) {
-			if(webCLGLVertexFragmentProgram.vertexUniforms[n].type == 'float') {
-				this.gl.uniform1f(webCLGLVertexFragmentProgram.vertexUniforms[n].location[0], webCLGLVertexFragmentProgram.vertexUniforms[n].value);
-			} else if(webCLGLVertexFragmentProgram.vertexUniforms[n].type == 'float4') {
-				this.gl.uniform4f(webCLGLVertexFragmentProgram.vertexUniforms[n].location[0], webCLGLVertexFragmentProgram.vertexUniforms[n].value[0],
-																							webCLGLVertexFragmentProgram.vertexUniforms[n].value[1],
-																							webCLGLVertexFragmentProgram.vertexUniforms[n].value[2],
-																							webCLGLVertexFragmentProgram.vertexUniforms[n].value[3]);
-			} else if(webCLGLVertexFragmentProgram.vertexUniforms[n].type == 'mat4') {
-				this.gl.uniformMatrix4fv(webCLGLVertexFragmentProgram.vertexUniforms[n].location[0], false, webCLGLVertexFragmentProgram.vertexUniforms[n].value);
+			for(var n = 0, f = webCLGLVertexFragmentProgram.vertexUniforms.length; n < f; n++) {
+				if(webCLGLVertexFragmentProgram.vertexUniforms[n].value != undefined) {
+					if(webCLGLVertexFragmentProgram.vertexUniforms[n].type == 'float') {
+						this.gl.uniform1f(webCLGLVertexFragmentProgram.vertexUniforms[n].location[0], webCLGLVertexFragmentProgram.vertexUniforms[n].value);
+					} else if(webCLGLVertexFragmentProgram.vertexUniforms[n].type == 'float4') {
+						this.gl.uniform4f(webCLGLVertexFragmentProgram.vertexUniforms[n].location[0], webCLGLVertexFragmentProgram.vertexUniforms[n].value[0],
+																									webCLGLVertexFragmentProgram.vertexUniforms[n].value[1],
+																									webCLGLVertexFragmentProgram.vertexUniforms[n].value[2],
+																									webCLGLVertexFragmentProgram.vertexUniforms[n].value[3]);
+					} else if(webCLGLVertexFragmentProgram.vertexUniforms[n].type == 'mat4') {
+						this.gl.uniformMatrix4fv(webCLGLVertexFragmentProgram.vertexUniforms[n].location[0], false, webCLGLVertexFragmentProgram.vertexUniforms[n].value);
+					}
+				}
 			}
-		}
-				
-		if(buffer.mode == "VERTEX_INDEX") {
-			this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, buffer.items[i].vertexData0);
-			this.gl.drawElements(Dmode, buffer.items[i].length, this.gl.UNSIGNED_SHORT, 0); 
-		} else {
-			this.gl.drawArrays(Dmode, 0, buffer.items[i].length);
+					
+			if(buffer.mode == "VERTEX_INDEX") {
+				this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, buffer.items[i].vertexData0);
+				this.gl.drawElements(Dmode, buffer.items[i].length, this.gl.UNSIGNED_SHORT, 0); 
+			} else {
+				this.gl.drawArrays(Dmode, 0, buffer.items[i].length);
+			}
 		}
 	}
 };

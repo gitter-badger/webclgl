@@ -3,7 +3,7 @@
 * @class
 * @constructor
 */
-WebCLGLKernelProgram = function(gl, sv, sf, in_values) { 
+function WebCLGLKernelProgram(gl, sv, sf, in_values) { 
 	this.gl = gl;
 	this.utils = new WebCLGLUtils();
 	

@@ -6,7 +6,7 @@
 * @property {Array<Float>} inData Original array
 * @property {Int} [offset=0] offset of buffer
 */
-WebCLGLBufferItem = function(gl, length, type, offset, linear, mode) { 
+function WebCLGLBufferItem(gl, length, type, offset, linear, mode) { 
 	this.gl = gl;
 		
 	if(length instanceof Object) { 

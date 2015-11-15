@@ -3,7 +3,7 @@
 * @class
 * @constructor
 */
-WebCLGLWork = function(webCLGL, offset) {
+function WebCLGLWork(webCLGL, offset) {
 	this.webCLGL = webCLGL;
 	this.offset = (offset != undefined) ? offset : 100.0;
 	
