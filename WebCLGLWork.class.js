@@ -219,7 +219,7 @@ WebCLGLWork.prototype.enqueueNDRangeKernel = function() {
 	for(var key in this.vertexFragmentPrograms) {
 		for(var nb=0; nb < this.vertexFragmentPrograms[key].in_vertex_values.length; nb++) {
 			var inValues = this.vertexFragmentPrograms[key].in_vertex_values[nb];
-			if(inValues.type == "buffer_float4_fromKernel" || inValues.type == "buffer_float_fromKernel") {
+			if(inValues.value != undefined && (inValues.type == "buffer_float4_fromKernel" || inValues.type == "buffer_float_fromKernel")) {
 				this.webCLGL.enqueueReadBuffer_Packet4Uint8Array_Float4(this.buffers[inValues.name]); 
 			}
 		}
