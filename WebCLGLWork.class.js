@@ -3,7 +3,7 @@
 * @class
 * @constructor
 */
-function WebCLGLWork(webCLGL, offset) {
+WebCLGLWork = function(webCLGL, offset) {
 	this.webCLGL = webCLGL;
 	this.offset = (offset != undefined) ? offset : 100.0;
 	
@@ -70,10 +70,10 @@ WebCLGLWork.prototype.addVertexFragmentProgram = function(vertexFragmentProgram,
 * Assign value of a argument for all added Kernels and vertexFragmentProgram
 * @param {String} argument Argument to set
 * @param {Array<Float>|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement} value
-* @param {Array<Float>} [splits=[array.length]]
-* @type Void
+* @param {Array<Float>} [splits=[value.length]]
+* @param {Array<Float2>} [overrideDimensions=new Array(){Math.sqrt(value.length), Math.sqrt(value.length)}]
  */
-WebCLGLWork.prototype.setArg = function(argument, value, splits) {	
+WebCLGLWork.prototype.setArg = function(argument, value, splits, overrideDimensions) {	
 	var kernelPr = [];
 	var vPr = [];
 	var fPr = [];
@@ -156,7 +156,12 @@ WebCLGLWork.prototype.setArg = function(argument, value, splits) {
 			mode = "FRAGMENT";
 		}
 		
-		var length = (value instanceof HTMLImageElement) ? (value.width*value.height) : ((type == "FLOAT4") ? value.length/4 : value.length);
+		var length;
+		if(overrideDimensions == undefined) {
+			length = (value instanceof HTMLImageElement) ? (value.width*value.height) : ((type == "FLOAT4") ? value.length/4 : value.length);
+		} else {
+			length = [overrideDimensions[0], overrideDimensions[1]];
+		}
 		var spl = (splits != undefined) ? splits : [length];
 		
 		buff = this.webCLGL.createBuffer(length, type, this.offset, false, mode, spl);
