@@ -4,9 +4,9 @@
 * @constructor
 * @property {Float} length
 */
-function WebCLGLBuffer(gl, length, type, offset, linear, mode, splits) {
+WebCLGLBuffer = function(gl, length, type, offset, linear, mode, splits) {
 	this.gl = gl;
-	this.length = (length instanceof Array) ? length[0]*length[1] : length;
+	this.length = (length.constructor === Array) ? [length[0],length[1]] : length;
 	this.type = type;
 	this.offset = offset;
 	this.linear = linear;
@@ -16,17 +16,21 @@ function WebCLGLBuffer(gl, length, type, offset, linear, mode, splits) {
 	this.items = [];
 	var countArr = this.length;
 	currItem = 0;
-	while(true) {
-		var spl = (currItem == 0) ? this.splits[currItem] : this.splits[currItem]-this.splits[currItem-1];
-		if(countArr > spl) {
-			this.items[currItem] = new WebCLGLBufferItem(gl, spl, type, offset, linear, mode);	
-			countArr -= spl;
-		} else {
-			this.items[currItem] = new WebCLGLBufferItem(gl, countArr, type, offset, linear, mode);
-			countArr -= countArr;
+	if(this.length.constructor !== Array) {		
+		while(true) {
+			var spl = (currItem == 0) ? this.splits[currItem] : this.splits[currItem]-this.splits[currItem-1];
+			if(countArr > spl) {
+				this.items[currItem] = new WebCLGLBufferItem(gl, spl, type, offset, linear, mode);	
+				countArr -= spl;
+			} else {
+				this.items[currItem] = new WebCLGLBufferItem(gl, countArr, type, offset, linear, mode);
+				countArr -= countArr;
+			}
+			if(countArr <= 0) break;
+			currItem++;
 		}
-		if(countArr <= 0) break;
-		currItem++;
+	} else {
+		this.items[currItem] = new WebCLGLBufferItem(gl, this.length, type, offset, linear, mode);
 	}
 };
 
