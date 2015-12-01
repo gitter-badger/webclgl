@@ -242,10 +242,6 @@ WebCLGLWork.prototype.enqueueNDRangeKernel = function() {
 WebCLGLWork.prototype.enqueueVertexFragmentProgram = function(argument, vertexFragmentProgramName, beforerender, drawMode) {  
 	beforerender();
 	
-	if(this.CLGL_bufferIndices != undefined)
-		this.webCLGL.enqueueVertexFragmentProgram(this.vertexFragmentPrograms[vertexFragmentProgramName], this.CLGL_bufferIndices, drawMode); 
-	else {
-		var buff = this.buffers[argument];
-		this.webCLGL.enqueueVertexFragmentProgram(this.vertexFragmentPrograms[vertexFragmentProgramName], buff, drawMode);
-	}
+	var buff = (this.CLGL_bufferIndices != undefined) ? this.CLGL_bufferIndices : this.buffers[argument];	
+	this.webCLGL.enqueueVertexFragmentProgram(this.vertexFragmentPrograms[vertexFragmentProgramName], buff, drawMode);
 };
