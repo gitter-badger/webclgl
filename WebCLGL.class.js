@@ -296,13 +296,17 @@ WebCLGL.prototype.enqueueNDRangeKernelNow = function(webCLGLKernel) {
 		else
 			this.gl.activeTexture(this.gl["TEXTURE16"]);
 		
-		this.gl.bindTexture(this.gl.TEXTURE_2D, kp.samplers[n].value.items[0].textureData);
-		this.gl.uniform1i(kp.samplers[n].location[0], currentTextureUnit);
-		
+		if(kp.samplers[n].value != undefined) {
+			this.gl.bindTexture(this.gl.TEXTURE_2D, kp.samplers[n].value.items[0].textureData);
+			this.gl.uniform1i(kp.samplers[n].location[0], currentTextureUnit);
+		} else {					
+			this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+		}
 		currentTextureUnit++;
 	}
 	for(var n = 0, f = kp.uniforms.length; n < f; n++) 		
-		this.gl.uniform1f(kp.uniforms[n].location, kp.uniforms[n].value);
+		if(kp.uniforms[n].value != undefined)
+			this.gl.uniform1f(kp.uniforms[n].location, kp.uniforms[n].value);
 	
 	
 	this.gl.enableVertexAttribArray(kp.attr_VertexPos);
@@ -336,12 +340,12 @@ WebCLGL.prototype.enqueueVertexFragmentProgram = function(webCLGLVertexFragmentP
 			
 			var currentTextureUnit = 0;
 			for(var n = 0, f = webCLGLVertexFragmentProgram.fragmentSamplers.length; n < f; n++) {
+				if(currentTextureUnit < 16)
+					this.gl.activeTexture(this.gl["TEXTURE"+currentTextureUnit]);
+				else
+					this.gl.activeTexture(this.gl["TEXTURE16"]);
+				
 				if(webCLGLVertexFragmentProgram.fragmentSamplers[n].value != undefined) {
-					if(currentTextureUnit < 16)
-						this.gl.activeTexture(this.gl["TEXTURE"+currentTextureUnit]);
-					else
-						this.gl.activeTexture(this.gl["TEXTURE16"]);
-					
 					this.gl.bindTexture(this.gl.TEXTURE_2D, webCLGLVertexFragmentProgram.fragmentSamplers[n].value.items[i].textureData);
 					this.gl.uniform1i(webCLGLVertexFragmentProgram.fragmentSamplers[n].location[0], currentTextureUnit);					
 				} else {					
