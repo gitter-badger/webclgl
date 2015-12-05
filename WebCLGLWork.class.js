@@ -17,7 +17,6 @@ WebCLGLWork = function(webCLGL, offset) {
 * Add one WebCLGLKernel to the work
 * @param {WebCLGLKernel} kernel
 * @param {String} [argument=undefined] Save the result in this argument or output in default framebuffer
-* @type Void
  */
 WebCLGLWork.prototype.addKernel = function(kernel, argument) {  
 	var exists = false;
@@ -36,7 +35,6 @@ WebCLGLWork.prototype.addKernel = function(kernel, argument) {
 /**
 * Get one added WebCLGLKernel
 * @param {String} argument Get assigned kernel for this argument
-* @type Void
  */
 WebCLGLWork.prototype.getKernel = function(argument) { 
 	for(var n=0; n < this.kernels.length; n++) {
@@ -50,7 +48,6 @@ WebCLGLWork.prototype.getKernel = function(argument) {
 * Add one WebCLGLVertexFragmentProgram to the work
 * @param {WebCLGLVertexFragmentProgram} vertexFragmentProgram
 * @param {String} name Name for identify this vertexFragmentProgram
-* @type Void
  */
 WebCLGLWork.prototype.addVertexFragmentProgram = function(vertexFragmentProgram, name) {
 	var exists = false;
@@ -198,7 +195,6 @@ WebCLGLWork.prototype.setArg = function(argument, value, splits, overrideDimensi
 * Set indices
 * @param {Array<Float>} array 
 * @param {Array<Float>} [splits=[array.length]]
-* @type Void
  */
 WebCLGLWork.prototype.setIndices = function(arr, splits) {  
 	var spl = (splits != undefined) ? splits : [arr.length];
@@ -208,7 +204,6 @@ WebCLGLWork.prototype.setIndices = function(arr, splits) {
 
 /**
 * Process kernels
-* @type Void
  */
 WebCLGLWork.prototype.enqueueNDRangeKernel = function() {  
 	for(var n=0; n < this.kernels.length; n++) { 
@@ -237,7 +232,6 @@ WebCLGLWork.prototype.enqueueNDRangeKernel = function() {
 * @param {String} vertexFragmentProgramName Name of vertexFragmentProgram to execute
 * @param {Function} beforerender onBeforeRender function
 * @param {Int} drawMode
-* @type Void
  */
 WebCLGLWork.prototype.enqueueVertexFragmentProgram = function(argument, vertexFragmentProgramName, beforerender, drawMode) {  
 	beforerender();
