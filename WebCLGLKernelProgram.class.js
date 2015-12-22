@@ -16,6 +16,8 @@ WebCLGLKernelProgram = function(gl, sv, sf, in_values) {
 	this.attr_VertexPos = this.gl.getAttribLocation(this.kernel, "aVertexPosition");
 	this.attr_TextureCoord = this.gl.getAttribLocation(this.kernel, "aTextureCoord");	
 
+	this.uBufferWidth = this.gl.getUniformLocation(this.kernel, "uBufferWidth");
+	
 	for(var n = 0, f = in_values.length; n < f; n++) {
 		if(in_values[n].type == 'buffer_float4' || in_values[n].type == 'buffer_float') {
 			this.samplers.push({location:[this.gl.getUniformLocation(this.kernel, in_values[n].name)],

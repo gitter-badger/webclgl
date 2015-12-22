@@ -4,9 +4,9 @@
 	<title>WebCLGLWork Demo</title>
     <meta name="description" content="WebCLGL" />
     <meta charset=utf-8 />
-   
+
 	<script src="scene_utils.js"></script>
-   
+
     <script src="../../WebCLGLUtils.class.js"></script>
 	<script src="../../WebCLGLBuffer.class.js"></script>
 	<script src="../../WebCLGLBufferItem.class.js"></script>
@@ -15,38 +15,41 @@
 	<script src="../../WebCLGLVertexFragmentProgram.class.js"></script>
 	<script src="../../WebCLGLWork.class.js"></script>
 	<script src="../../WebCLGL.class.js"></script>
-   
+
   </head>
-  <body style="background-color:#FFF" onload="tick()"> 
-    
+  <body style="background-color:#FFF" onload="tick()">
+
 		<canvas id="graph" width="512" height="512"></canvas>
-		  
+
 		<script>
 		var utils = new WebCLGLUtils();
 		var gl = utils.getWebGLContextFromCanvas(document.getElementById("graph"));
 		var offset = 100.0;
 		var box = loadBox();
-		
+
 		var arrPP = [];
 		arrPP.push({"x": 0.0, "y": 0.0, "z": 0.0});
-						
+
+    var arrayNodeId = [];
 		var arrayNodePosXYZW = [];
 		var arrayNodeVertexPos = [];
 		var arrayNodeVertexColor = [];
-		var arrayNodeIndices = [];		
+		var arrayNodeIndices = [];
+    var nodeId = 0;
 		var startIndexId = 0;
-		
+
 		var webCLGL = new WebCLGL(gl);
-		
-		var clglWork = webCLGL.createWork(offset);	
-	
+
+		var clglWork = webCLGL.createWork(offset);
+
 		var source_vertexFragmentProgram = function() {
 			var str_vfp = [
 				// vertex head
 				['varying vec4 vVertexColor; '],
-				
+
 				// vertex source
 				['void main(float4*kernel posXYZW,'+ // *kernel for make update in vertex from lasts kernel
+              'float* nodeId,'+
 							'float4* nodeVertexPos,'+
 							'float4* nodeVertexCol,'+
 							'mat4 PMatrix,'+
@@ -54,42 +57,43 @@
 							'mat4 nodeWMatrix,'+
 							'float nodesSize) {'+
 					'vec2 x = get_global_id();'+
-			
-					'vec4 nodePosition = posXYZW[x];\n'+
+          'vec2 xx = get_global_id(nodeId[x]);'+
+
+					'vec4 nodePosition = posXYZW[xx];\n'+
 					'vec4 nodeVertexPosition = nodeVertexPos[x];\n'+
 					'vec4 nodeVertexColor = nodeVertexCol[x];\n'+
-					
+
 					'mat4 nodepos = nodeWMatrix;'+
 					'nodepos[3][0] = nodePosition.x;'+
 					'nodepos[3][1] = nodePosition.y;'+
 					'nodepos[3][2] = nodePosition.z;'+
-					
+
 					'vVertexColor = nodeVertexColor;'+
 					'gl_Position = PMatrix * cameraWMatrix * nodepos * nodeVertexPosition;\n'+
 					'gl_PointSize = 2.0;\n'+
 				'}'],
-				
+
 				// fragment head
 				['varying vec4 vVertexColor;'],
-				
+
 				// fragment source
 				['void main(float nodesSize) {'+
 					'vec2 x = get_global_id();'+
 					'gl_FragColor = vVertexColor;\n'+
 				 '}']];
-			
+
 			return str_vfp;
 		};
 		var source_positionByDirection = function() {
 			var str = 'void main(float4* posXYZW,'+
 								'float4* dir) {'+
 									'vec2 x = get_global_id();'+
-									'vec3 currentPos = posXYZW[x].xyz;\n'+ 
+									'vec3 currentPos = posXYZW[x].xyz;\n'+
 									'vec4 dir = dir[x];'+
-									'vec3 currentDir = vec3(dir.x,dir.y,dir.z);\n'+   
+									'vec3 currentDir = vec3(dir.x,dir.y,dir.z);\n'+
 									'vec3 newPos = (currentPos+currentDir);\n'+
-										
-									'out_float4 = vec4(newPos, 1.0);\n'+ 
+
+									'out_float4 = vec4(newPos, 1.0);\n'+
 					'}';
 			return str;
 		};
@@ -103,111 +107,115 @@
 				}
 				return str;
 			}).bind(this);
-			
+
 			lines_poles = (function() {
 				var str = 'float offset;vec3 polePos; vec3 cc;float distanceToPole;\n';
 				for(var n = 0, f = arrPP.length; n < f; n++) {
 					str += 'polePos = vec3(pole'+n+'X,pole'+n+'Y,pole'+n+'Z);\n'+
 							'offset = '+offset.toFixed(20)+';'+
-							
+
 							'distanceToPole = 1.0-sqrt(length(vec3(polePos-currentPos)/offset));'+
-							
+
 							'vec3 vecN = ((vec3(polePos-currentPos)-(-1.0))/(1.0-(-1.0)) - 0.5 ) *2.0;'+
 							'cc = vecN*distanceToPole ;\n'+
-							
+
 							'currentDir = clamp(currentDir+(cc*0.001),-1.0,1.0) ;\n';
 				}
 				return str;
 			}).bind(this);
-			
+
 			var str =	'void main(	float4* posXYZW'+
 									',float4* dir'+
 									lines_argumentsPoles()+
 									') {\n'+
-							'vec2 x = get_global_id();\n'+	 
-							
-							'vec4 dirA = dir[x];'+								
-							'vec3 currentDir = vec3(dirA.x,dirA.y,dirA.z);\n'+ 
-							'vec3 currentPos = posXYZW[x].xyz;\n'+ 
-							
+							'vec2 x = get_global_id();\n'+
+
+							'vec4 dirA = dir[x];'+
+							'vec3 currentDir = vec3(dirA.x,dirA.y,dirA.z);\n'+
+							'vec3 currentPos = posXYZW[x].xyz;\n'+
+
 							lines_poles()+
-							
+
 							'vec3 newDir = currentDir*0.995;\n'+
 
 							'out_float4 = vec4(newDir,1.0);\n'+
 						'}';
 			return str;
 		};
-		
-		// VERTEX AND FRAGMENT PROGRAMS	
+
+		// VERTEX AND FRAGMENT PROGRAMS
 		var clglWorvfProgram_nodes = webCLGL.createVertexFragmentProgram();
 		var str_vfp = source_vertexFragmentProgram();
 		clglWorvfProgram_nodes.setVertexSource(str_vfp[1][0], str_vfp[0][0]);
 		clglWorvfProgram_nodes.setFragmentSource(str_vfp[3][0], str_vfp[2][0]);
-		
+
 		// KERNEL POSITION BY DIRECTION
 		var clglWorkernel_positionByDirection_nodes = webCLGL.createKernel();
 		var str_posdir = source_positionByDirection();
 		clglWorkernel_positionByDirection_nodes.setKernelSource(str_posdir);
-		
+
 		// KERNEL DIRECTION
-		var clglWorkernel_direction_nodes = webCLGL.createKernel(); 
+		var clglWorkernel_direction_nodes = webCLGL.createKernel();
 		var str_dir = source_direction();
 		clglWorkernel_direction_nodes.setKernelSource(str_dir);
-		
+
 		// ADD TO WEBCLGL WORK
 		clglWork.addVertexFragmentProgram(clglWorvfProgram_nodes, "vertexFragmentProgram1");
 		clglWork.addKernel(clglWorkernel_positionByDirection_nodes, "posXYZW");
 		clglWork.addKernel(clglWorkernel_direction_nodes, "dir");
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		var addNode = function(jsonIn) {				
+
+
+
+
+
+
+
+
+
+		var addNode = function(jsonIn) {
 			// vertices
 			for(var n=0; n < box.vertices.length/3; n++) {
 				var idxVertex = n*3;
-				
+
+        arrayNodeId.push(nodeId);
 				arrayNodePosXYZW.push(jsonIn.position[0], jsonIn.position[1], jsonIn.position[2], 1.0);
 				arrayNodeVertexPos.push(box.vertices[idxVertex], box.vertices[idxVertex+1], box.vertices[idxVertex+2], 1.0);
 				arrayNodeVertexColor.push(jsonIn.color[0], jsonIn.color[1], jsonIn.color[2], 1.0);
 			}
-			
+
 			// indices
 			var maxNodeIndexId = 0;
 			for(var n=0; n < box.indices.length; n++) {
 				var idxIndex = n;
-				
+
 				arrayNodeIndices.push(startIndexId+box.indices[idxIndex]);
-				
+
 				if(box.indices[idxIndex] > maxNodeIndexId) {
-					maxNodeIndexId = box.indices[idxIndex];			
+					maxNodeIndexId = box.indices[idxIndex];
 				}
 			}
 			startIndexId += (maxNodeIndexId+1);
+
+      nodeId++;
 		};
-		
+
 		var updateWork = function() {
 			updatePP(clglWork);
-			
-			clglWork.setArg("posXYZW", arrayNodePosXYZW);	
+
+      clglWork.setArg("nodeId", arrayNodeId);
+			clglWork.setArg("posXYZW", arrayNodePosXYZW);
 			clglWork.setArg("nodeVertexPos", arrayNodeVertexPos);
 			clglWork.setArg("nodeVertexCol", arrayNodeVertexColor);
 			clglWork.setIndices(arrayNodeIndices);
-			
-			var arrayNodeDir = [];	
+
+			var arrayNodeDir = [];
 			var x = Math.random(); var y = Math.random(); var z = Math.random();
 			for(var n=0; n < arrayNodePosXYZW.length/4; n++) {
 				arrayNodeDir.push(x, y, z, 255);
 			}
 			clglWork.setArg("dir", arrayNodeDir);
-			
-			
+
+
 			clglWork.setArg("PMatrix", transpose(getProyection()));
 			clglWork.setArg("cameraWMatrix", transpose(new Float32Array([	1.0, 0.0, 0.0, 0.0,
 																			0.0, 1.0, 0.0, 0.0,
@@ -218,19 +226,19 @@
 																		0.0, 0.0, 1.0, 0.0,
 																		0.0, 0.0, 0.0, 1.0])));
 			clglWork.setArg("nodesSize", 30);
-		}; 
+		};
 		var updatePP = function(clglWork) {
 			var kernel = clglWork.getKernel("dir");
 			kernel.setKernelSource(source_direction());
 			clglWork.addKernel(kernel, "dir"); // override old added
-			
+
 			for(var n = 0, f = arrPP.length; n < f; n++) {
 				clglWork.setArg('pole'+n+'X', arrPP[n].x);
-				clglWork.setArg('pole'+n+'Y', arrPP[n].y); 
+				clglWork.setArg('pole'+n+'Y', arrPP[n].y);
 				clglWork.setArg('pole'+n+'Z', arrPP[n].z);
 			}
 		};
-		
+
 
 
 
@@ -245,43 +253,40 @@
 			var x = -(offset/2)+(Math.random()*offset);
 			var y = -(offset/2)+(Math.random()*offset);
 			var z = -(offset/2)+(Math.random()*offset);
-			
+
 			var node = addNode({"position": [x, y, z],
 								"color": [Math.random(), Math.random(), Math.random()]});
 		}
 		updateWork();
-				
+
 		var tick = function() {
 			window.requestAnimFrame(tick);
-			
-			
+
 			clglWork.enqueueNDRangeKernel();
-		
+
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 			gl.viewport(0, 0, 512, 512);
 			gl.clearColor(0.0, 0.0, 0.0, 1.0);
 			//gl.clearDepth(1.0);
 			//gl.enable(gl.DEPTH_TEST);
 			//gl.depthFunc(gl.LEQUAL);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-			
-			clglWork.enqueueVertexFragmentProgram("posXYZW", "vertexFragmentProgram1", function() {
-				gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-				
-				clglWork.setArg("PMatrix", transpose(getProyection()));
-				clglWork.setArg("cameraWMatrix", transpose(new Float32Array([	1.0, 0.0, 0.0, 0.0,
-																				0.0, 1.0, 0.0, 0.0,
-																				0.0, 0.0, 1.0, -100.0,
-																				0.0, 0.0, 0.0, 1.0])));
-				clglWork.setArg("nodeWMatrix", transpose(new Float32Array([	1.0, 0.0, 0.0, 0.0,
-																			0.0, 1.0, 0.0, 0.0,
-																			0.0, 0.0, 1.0, 0.0,
-																			0.0, 0.0, 0.0, 1.0]))); 
-				clglWork.setArg("nodesSize", 30);
-			}, gl.TRIANGLES);
+
+
+      clglWork.setArg("PMatrix", transpose(getProyection()));
+      clglWork.setArg("cameraWMatrix", transpose(new Float32Array([	1.0, 0.0, 0.0, 0.0,
+                                      0.0, 1.0, 0.0, 0.0,
+                                      0.0, 0.0, 1.0, -100.0,
+                                      0.0, 0.0, 0.0, 1.0])));
+      clglWork.setArg("nodeWMatrix", transpose(new Float32Array([	1.0, 0.0, 0.0, 0.0,
+                                    0.0, 1.0, 0.0, 0.0,
+                                    0.0, 0.0, 1.0, 0.0,
+                                    0.0, 0.0, 0.0, 1.0])));
+      clglWork.setArg("nodesSize", 30);
+			clglWork.enqueueVertexFragmentProgram("posXYZW", "vertexFragmentProgram1", gl.TRIANGLES, 24);
 		};
-		
+
 		</script>
-		
+
 	</body>
 </html>
