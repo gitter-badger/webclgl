@@ -79,15 +79,50 @@ WebCLGLUtils.prototype.getWebGLContextFromCanvas = function(canvas, ctxOpt) {
 WebCLGLUtils.prototype.createShader = function(gl, name, sourceVertex, sourceFragment, shaderProgram) {
 	var _sv = false, _sf = false;
 	
+	var makeDebug = (function(infoLog) {
+		console.log(infoLog);
+		
+		var arrErrors = [];
+		var errors = infoLog.split("\n");
+		for(var n = 0, f = errors.length; n < f; n++) {
+			if(errors[n].match(/^ERROR/gim) != null) {
+				var expl = errors[n].split(':');
+				var line = parseInt(expl[2]);
+				arrErrors.push([line,errors[n]]);
+			}
+		}
+		var sour = gl.getShaderSource(shaderFragment).split("\n");
+		sour.unshift("");
+		for(var n = 0, f = sour.length; n < f; n++) {
+			var lineWithError = false;
+			var errorStr = '';
+			for(var e = 0, fe = arrErrors.length; e < fe; e++) {
+				if(n == arrErrors[e][0]) {
+					lineWithError = true;
+					errorStr = arrErrors[e][1];
+					break;
+				}
+			}
+			if(lineWithError == false) {
+				console.log("%c"+n+' %c'+sour[n], "color:black", "color:blue");
+			} else {
+				console.log('%c►►%c'+n+' %c'+sour[n]+'\n%c'+errorStr, "color:red", "color:black", "color:blue", "color:red");
+			}
+		}
+	}).bind(this);
+	
+	
 	var shaderVertex = gl.createShader(gl.VERTEX_SHADER);
 	gl.shaderSource(shaderVertex, sourceVertex);
 	gl.compileShader(shaderVertex);
 	if (!gl.getShaderParameter(shaderVertex, gl.COMPILE_STATUS)) {
-		alert('Error sourceVertex of shader '+name+'. See console.');
-		console.log('Error vertex-shader '+name+':\n '+gl.getShaderInfoLog(shaderVertex));
-		if(gl.getShaderInfoLog(shaderVertex) != undefined) {
-			console.log(gl.getShaderInfoLog(shaderVertex));
-		}
+		alert(name+' ERROR (vertex program). See console.');
+		
+		var infoLog = gl.getShaderInfoLog(shaderVertex);
+		console.log("%c"+name+' ERROR (vertex program)', "color:red");
+		
+		if(infoLog != undefined)
+			makeDebug(infoLog);
 	} else  {
 		gl.attachShader(shaderProgram, shaderVertex);
 		_sv = true;
@@ -97,39 +132,13 @@ WebCLGLUtils.prototype.createShader = function(gl, name, sourceVertex, sourceFra
 	gl.shaderSource(shaderFragment, sourceFragment);
 	gl.compileShader(shaderFragment);
 	if (!gl.getShaderParameter(shaderFragment, gl.COMPILE_STATUS)) {
-		alert('Error sourceFragment of shader '+name+'. See console.');
+		alert(name+' ERROR (fragment program). See console.');
+		
 		var infoLog = gl.getShaderInfoLog(shaderFragment);
-		console.log('Error fragment-shader '+name+':\n '+infoLog);
-		if(infoLog != undefined) {
-			console.log(infoLog);
-			var arrErrors = [];
-			var errors = infoLog.split("\n");
-			for(var n = 0, f = errors.length; n < f; n++) {
-				if(errors[n].match(/^ERROR/gim) != null) {
-					var expl = errors[n].split(':');
-					var line = parseInt(expl[2]);
-					arrErrors.push([line,errors[n]]);
-				}
-			}
-			var sour = gl.getShaderSource(shaderFragment).split("\n");
-			sour.unshift("");
-			for(var n = 0, f = sour.length; n < f; n++) {
-				var lineWithError = false;
-				var errorStr = '';
-				for(var e = 0, fe = arrErrors.length; e < fe; e++) {
-					if(n == arrErrors[e][0]) {
-						lineWithError = true;
-						errorStr = arrErrors[e][1];
-						break;
-					}
-				}
-				if(lineWithError == false) {
-					console.log(n+' '+sour[n]);
-				} else {
-					console.log('►►'+n+' '+sour[n]+'\n'+errorStr);
-				}
-			}
-		}
+		console.log("%c"+name+' ERROR (fragment program)', "color:red");
+		
+		if(infoLog != undefined)
+			makeDebug(infoLog);
 	} else {
 		gl.attachShader(shaderProgram, shaderFragment);	
 		_sf = true;

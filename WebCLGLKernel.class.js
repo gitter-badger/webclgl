@@ -86,7 +86,7 @@ WebCLGLKernel.prototype.parse = function(source) {
 			}
 		}
 	}
-	source = source.replace(/```(\s|\t)*gl/gi, "").replace(/```/gi, "");
+	source = source.replace(/```(\s|\t)*gl/gi, "").replace(/```/gi, "").replace(/;/gi, ";\n").replace(/}/gi, "}\n").replace(/{/gi, "{\n");
 	//console.log('%c translated source:'+source, "background-color:#000;color:#FFF");
 	return source;
 };
