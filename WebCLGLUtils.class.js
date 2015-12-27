@@ -79,7 +79,7 @@ WebCLGLUtils.prototype.getWebGLContextFromCanvas = function(canvas, ctxOpt) {
 WebCLGLUtils.prototype.createShader = function(gl, name, sourceVertex, sourceFragment, shaderProgram) {
 	var _sv = false, _sf = false;
 	
-	var makeDebug = (function(infoLog) {
+	var makeDebug = (function(infoLog, shader) {
 		console.log(infoLog);
 		
 		var arrErrors = [];
@@ -91,7 +91,7 @@ WebCLGLUtils.prototype.createShader = function(gl, name, sourceVertex, sourceFra
 				arrErrors.push([line,errors[n]]);
 			}
 		}
-		var sour = gl.getShaderSource(shaderFragment).split("\n");
+		var sour = gl.getShaderSource(shader).split("\n");
 		sour.unshift("");
 		for(var n = 0, f = sour.length; n < f; n++) {
 			var lineWithError = false;
@@ -122,7 +122,7 @@ WebCLGLUtils.prototype.createShader = function(gl, name, sourceVertex, sourceFra
 		console.log("%c"+name+' ERROR (vertex program)', "color:red");
 		
 		if(infoLog != undefined)
-			makeDebug(infoLog);
+			makeDebug(infoLog, shaderVertex);
 	} else  {
 		gl.attachShader(shaderProgram, shaderVertex);
 		_sv = true;
@@ -138,7 +138,7 @@ WebCLGLUtils.prototype.createShader = function(gl, name, sourceVertex, sourceFra
 		console.log("%c"+name+' ERROR (fragment program)', "color:red");
 		
 		if(infoLog != undefined)
-			makeDebug(infoLog);
+			makeDebug(infoLog, shaderFragment);
 	} else {
 		gl.attachShader(shaderProgram, shaderFragment);	
 		_sf = true;
