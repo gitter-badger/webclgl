@@ -7,7 +7,7 @@ WebCLGLWork = function(webCLGL, offset) {
 	this.webCLGL = webCLGL;
 	this.offset = (offset != undefined) ? offset : 100.0;
 
-	this.kernels = [];
+	this.kernels = {};
 	this.vertexFragmentPrograms = {};
 	this.buffers = {};
 	this.buffers_TEMP = {};
@@ -27,30 +27,30 @@ WebCLGLWork = function(webCLGL, offset) {
 /**
 * Add one WebCLGLKernel to the work
 * @param {WebCLGLKernel} kernel
-* @param {String} [argument=undefined] Save the result in this argument or output in default framebuffer
+* @param {String} name Name for identify this kernel
  */
-WebCLGLWork.prototype.addKernel = function(kernel, argument) {
+WebCLGLWork.prototype.addKernel = function(kernel, name) {
 	var exists = false;
-	for(var n=0; n < this.kernels.length; n++) {
-		if(this.kernels[n] == kernel) {
-			this.kernels[n] = {"kernel": kernel, "argumentToUpdate": argument};
+	for(var key in this.kernels) {
+		if(this.kernels[key] == kernel) {
+			this.kernels[key] = kernel;
 			exists = true;
 			break;
 		}
 	}
 	if(exists == false) {
-		this.kernels.push({"kernel": kernel, "argumentToUpdate": argument});
+		this.kernels[name] = kernel;
 	}
 };
 
 /**
 * Get one added WebCLGLKernel
-* @param {String} argument Get assigned kernel for this argument
+* @param {String} name Get assigned kernel for this argument
  */
-WebCLGLWork.prototype.getKernel = function(argument) {
-	for(var n=0; n < this.kernels.length; n++) {
-		if(this.kernels[n].argumentToUpdate == argument) {
-			return this.kernels[n].kernel;
+WebCLGLWork.prototype.getKernel = function(name) {
+	for(var key in this.kernels) {
+		if(key == name) {
+			return this.kernels[key];
 		}
 	}
 };
@@ -86,9 +86,9 @@ WebCLGLWork.prototype.checkArg = function(argument) {
 	usedInVertex = false;
 	usedInFragment = false;
 
-	for(var n=0; n < this.kernels.length; n++) {
-		for(var nb=0; nb < this.kernels[n].kernel.in_values.length; nb++) {
-			var inValues = this.kernels[n].kernel.in_values[nb];
+	for(var key in this.kernels) {
+		for(var nb=0; nb < this.kernels[key].in_values.length; nb++) {
+			var inValues = this.kernels[key].in_values[nb];
 			if(inValues.name == argument) {
 				if(inValues.type == "buffer_float4") {
 					type = "FLOAT4";
@@ -98,12 +98,12 @@ WebCLGLWork.prototype.checkArg = function(argument) {
 					isBuffer = true;
 				}
 
-				kernelPr.push(this.kernels[n].kernel);
+				kernelPr.push(this.kernels[key]);
 				break;
 			}
 		}
 
-		if(updatedFromKernel == false && this.kernels[n].argumentToUpdate == argument)
+		if(updatedFromKernel == false)
 			updatedFromKernel = true;
 
 	}
@@ -181,11 +181,11 @@ WebCLGLWork.prototype.setArg = function(argument, value, splits, overrideDimensi
 		buff = this.webCLGL.createBuffer(length, type, this.offset, false, mode, spl);
 		this.webCLGL.enqueueWriteBuffer(buff, value);
 		this.buffers[argument] = buff;
-		if(updatedFromKernel == true) {
+		//if(updatedFromKernel == true) {
 			buffTMP = this.webCLGL.createBuffer(length, type, this.offset, false, mode, spl);
 			this.webCLGL.enqueueWriteBuffer(buffTMP, value);
 			this.buffers_TEMP[argument] = buffTMP;
-		}
+		//}
 
 
 		for(var n=0; n < kernelPr.length; n++)
@@ -236,9 +236,9 @@ WebCLGLWork.prototype.setSharedBufferArg = function(argument, clglWork) {
  */
 WebCLGLWork.prototype.getAllArgs = function() {
 	var args = {};
-	for(var n=0; n < this.kernels.length; n++) {
-		for(var nb=0; nb < this.kernels[n].kernel.in_values.length; nb++) {
-			var inValues = this.kernels[n].kernel.in_values[nb];
+	for(var key in this.kernels) {
+		for(var nb=0; nb < this.kernels[key].in_values.length; nb++) {
+			var inValues = this.kernels[key].in_values[nb];
 			args[inValues.name] = inValues;
 		}
 	}
@@ -272,18 +272,11 @@ WebCLGLWork.prototype.setIndices = function(arr, splits) {
 
 /**
 * Process kernels
+* @param {String} kernelName
+* @param {WebCLGLBuffer} [webCLGLBuffer=undefined]
  */
-WebCLGLWork.prototype.enqueueNDRangeKernel = function() {
-	for(var n=0; n < this.kernels.length; n++) {
-		if(this.kernels[n].argumentToUpdate != undefined)
-			this.webCLGL.enqueueNDRangeKernel(this.kernels[n].kernel, this.buffers_TEMP[this.kernels[n].argumentToUpdate]);
-		else
-			this.webCLGL.enqueueNDRangeKernel(this.kernels[n].kernel);
-	}
-	for(var n=0; n < this.kernels.length; n++) {
-		if(this.kernels[n].argumentToUpdate != undefined)
-			this.webCLGL.copy(this.buffers_TEMP[this.kernels[n].argumentToUpdate], this.buffers[this.kernels[n].argumentToUpdate]);
-	}
+WebCLGLWork.prototype.enqueueNDRangeKernel = function(kernelName, argumentToUpdate) {
+	this.webCLGL.enqueueNDRangeKernel(this.kernels[kernelName], argumentToUpdate);
 };
 
 /**
