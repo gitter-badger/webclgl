@@ -314,7 +314,12 @@ WebCLGL.prototype.enqueueNDRangeKernelNow = function(webCLGLKernel, i) {
 	for(var n = 0, f = kp.uniforms.length; n < f; n++) {
 		var ku = kp.uniforms[n];
 		if(ku.value != undefined)
-			this.gl.uniform1f(ku.location, ku.value);
+			if(ku.type == 'float')
+				this.gl.uniform1f(ku.location[0], ku.value);
+			else if(ku.type == 'float4')
+				this.gl.uniform4f(ku.location[0], ku.value[0], ku.value[1], ku.value[2], ku.value[3]);
+			else if(ku.type == 'mat4')
+				this.gl.uniformMatrix4fv(ku.location[0], false, ku.value);
 	}
 
 

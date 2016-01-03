@@ -43,37 +43,37 @@ WebCLGLVertexFragmentProgram.prototype.setVertexSource = function(vertexSource, 
 	for(var n = 0, f = argumentsSource.length; n < f; n++) {
 		if(argumentsSource[n].match(/\*kernel/gm) != null) {
 			if(argumentsSource[n].match(/float4/gm) != null) {
-				this.in_vertex_values[n] = {value:undefined,
-									type:'buffer_float4_fromKernel',
-									name:argumentsSource[n].split('*kernel')[1].trim()};
+				this.in_vertex_values[n] = {	value:undefined,
+												type:'buffer_float4_fromKernel',
+												name:argumentsSource[n].split('*kernel')[1].trim()};
 			} else if(argumentsSource[n].match(/float/gm) != null) {
-				this.in_vertex_values[n] = {value:undefined,
-									type:'buffer_float_fromKernel',
-									name:argumentsSource[n].split('*kernel')[1].trim()};
+				this.in_vertex_values[n] = {	value:undefined,
+												type:'buffer_float_fromKernel',
+												name:argumentsSource[n].split('*kernel')[1].trim()};
 			}
 		} else if(argumentsSource[n].match(/\*/gm) != null) {
 			if(argumentsSource[n].match(/float4/gm) != null) {
-				this.in_vertex_values[n] = {value:undefined,
-									type:'buffer_float4',
-									name:argumentsSource[n].split('*')[1].trim()};
+				this.in_vertex_values[n] = {	value:undefined,
+												type:'buffer_float4',
+												name:argumentsSource[n].split('*')[1].trim()};
 			} else if(argumentsSource[n].match(/float/gm) != null) {
-				this.in_vertex_values[n] = {value:undefined,
-									type:'buffer_float',
-									name:argumentsSource[n].split('*')[1].trim()};
+				this.in_vertex_values[n] = {	value:undefined,
+												type:'buffer_float',
+												name:argumentsSource[n].split('*')[1].trim()};
 			}
 		} else {
 			if(argumentsSource[n].match(/float4/gm) != null) {
-				this.in_vertex_values[n] = {value:undefined,
-									type:'float4',
-									name:argumentsSource[n].split(' ')[1].trim()};
+				this.in_vertex_values[n] = {	value:undefined,
+												type:'float4',
+												name:argumentsSource[n].split(' ')[1].trim()};
 			} else if(argumentsSource[n].match(/float/gm) != null) {
-				this.in_vertex_values[n] = {value:undefined,
-									type:'float',
-									name:argumentsSource[n].split(' ')[1].trim()};
+				this.in_vertex_values[n] = {	value:undefined,
+												type:'float',
+												name:argumentsSource[n].split(' ')[1].trim()};
 			} else if(argumentsSource[n].match(/mat4/gm) != null) {
-				this.in_vertex_values[n] = {value:undefined,
-									type:'mat4',
-									name:argumentsSource[n].split(' ')[1].trim()};
+				this.in_vertex_values[n] = {	value:undefined,
+												type:'mat4',
+												name:argumentsSource[n].split(' ')[1].trim()};
 			}
 		}
 	}
@@ -139,27 +139,27 @@ WebCLGLVertexFragmentProgram.prototype.setFragmentSource = function(fragmentSour
 	for(var n = 0, f = argumentsSource.length; n < f; n++) {
 		if(argumentsSource[n].match(/\*/gm) != null) {
 			if(argumentsSource[n].match(/float4/gm) != null) {
-				this.in_fragment_values[n] = {value:undefined,
-						type:'buffer_float4',
-						name:argumentsSource[n].split('*')[1].trim()};
+				this.in_fragment_values[n] = {	value:undefined,
+												type:'buffer_float4',
+												name:argumentsSource[n].split('*')[1].trim()};
 			} else if(argumentsSource[n].match(/float/gm) != null) {
-				this.in_fragment_values[n] = {value:undefined,
-									type:'buffer_float',
-									name:argumentsSource[n].split('*')[1].trim()};
+				this.in_fragment_values[n] = {	value:undefined,
+												type:'buffer_float',
+												name:argumentsSource[n].split('*')[1].trim()};
 			}
 		} else {
 			if(argumentsSource[n].match(/float4/gm) != null) {
-				this.in_fragment_values[n] = {value:undefined,
-									type:'float4',
-									name:argumentsSource[n].split(' ')[1].trim()};
+				this.in_fragment_values[n] = {	value:undefined,
+												type:'float4',
+												name:argumentsSource[n].split(' ')[1].trim()};
 			} else if(argumentsSource[n].match(/float/gm) != null) {
-				this.in_fragment_values[n] = {value:undefined,
-						type:'float',
-						name:argumentsSource[n].split(' ')[1].trim()};
+				this.in_fragment_values[n] = {	value:undefined,
+												type:'float',
+												name:argumentsSource[n].split(' ')[1].trim()};
 			} else if(argumentsSource[n].match(/mat4/gm) != null) {
-				this.in_fragment_values[n] = {value:undefined,
-									type:'mat4',
-									name:argumentsSource[n].split(' ')[1].trim()};
+				this.in_fragment_values[n] = {	value:undefined,
+												type:'mat4',
+												name:argumentsSource[n].split(' ')[1].trim()};
 			}
 		}
 	}
@@ -339,21 +339,24 @@ WebCLGLVertexFragmentProgram.prototype.compileVertexFragmentSource = function() 
 	// vertexAttributes & vertexUniforms
 	for(var n = 0, f = this.in_vertex_values.length; n < f; n++) {
 		if(this.in_vertex_values[n].type == 'buffer_float_fromKernel' || this.in_vertex_values[n].type == 'buffer_float4_fromKernel') {
-			this.vertexAttributes.push({location:[this.gl.getUniformLocation(this.vertexFragmentProgram, this.in_vertex_values[n].name)],
-										value:this.in_vertex_values[n].value,
-										type: this.in_vertex_values[n].type});
+			this.vertexAttributes.push({	location: [this.gl.getUniformLocation(this.vertexFragmentProgram, this.in_vertex_values[n].name)],
+											value: this.in_vertex_values[n].value,
+											type: this.in_vertex_values[n].type,
+											name: this.in_vertex_values[n].name});
 
 			this.in_vertex_values[n].idPointer = this.vertexAttributes.length-1;
 		} else if(this.in_vertex_values[n].type == 'buffer_float4' || this.in_vertex_values[n].type == 'buffer_float') {
-			this.vertexAttributes.push({location:[this.gl.getAttribLocation(this.vertexFragmentProgram, this.in_vertex_values[n].name)],
-										value:this.in_vertex_values[n].value,
-										type: this.in_vertex_values[n].type});
+			this.vertexAttributes.push({	location: [this.gl.getAttribLocation(this.vertexFragmentProgram, this.in_vertex_values[n].name)],
+											value: this.in_vertex_values[n].value,
+											type: this.in_vertex_values[n].type,
+											name: this.in_vertex_values[n].name});
 
 			this.in_vertex_values[n].idPointer = this.vertexAttributes.length-1;
 		} else if(this.in_vertex_values[n].type == 'float' || this.in_vertex_values[n].type == 'float4' || this.in_vertex_values[n].type == 'mat4') {
-			this.vertexUniforms.push({location:[this.gl.getUniformLocation(this.vertexFragmentProgram, this.in_vertex_values[n].name)],
-										value:this.in_vertex_values[n].value,
-										type: this.in_vertex_values[n].type});
+			this.vertexUniforms.push({	location: [this.gl.getUniformLocation(this.vertexFragmentProgram, this.in_vertex_values[n].name)],
+										value: this.in_vertex_values[n].value,
+										type: this.in_vertex_values[n].type,
+										name: this.in_vertex_values[n].name});
 
 			this.in_vertex_values[n].idPointer = this.vertexUniforms.length-1;
 		}
@@ -362,15 +365,17 @@ WebCLGLVertexFragmentProgram.prototype.compileVertexFragmentSource = function() 
 	// fragmentSamplers & fragmentUniforms
 	for(var n = 0, f = this.in_fragment_values.length; n < f; n++) {
 		if(this.in_fragment_values[n].type == 'buffer_float4' || this.in_fragment_values[n].type == 'buffer_float') {
-			this.fragmentSamplers.push({location:[this.gl.getUniformLocation(this.vertexFragmentProgram, this.in_fragment_values[n].name)],
-										value:this.in_fragment_values[n].value,
-										type: this.in_fragment_values[n].type});
+			this.fragmentSamplers.push({	location: [this.gl.getUniformLocation(this.vertexFragmentProgram, this.in_fragment_values[n].name)],
+											value: this.in_fragment_values[n].value,
+											type: this.in_fragment_values[n].type,
+											name: this.in_fragment_values[n].name});
 
 			this.in_fragment_values[n].idPointer = this.fragmentSamplers.length-1;
 		} else if(this.in_fragment_values[n].type == 'float' || this.in_fragment_values[n].type == 'float4' || this.in_fragment_values[n].type == 'mat4') {
-			this.fragmentUniforms.push({location:[this.gl.getUniformLocation(this.vertexFragmentProgram, this.in_fragment_values[n].name)],
-										value:this.in_fragment_values[n].value,
-										type: this.in_fragment_values[n].type});
+			this.fragmentUniforms.push({	location: [this.gl.getUniformLocation(this.vertexFragmentProgram, this.in_fragment_values[n].name)],
+											value: this.in_fragment_values[n].value,
+											type: this.in_fragment_values[n].type,
+											name: this.in_fragment_values[n].name});
 
 			this.in_fragment_values[n].idPointer = this.fragmentUniforms.length-1;
 		}
