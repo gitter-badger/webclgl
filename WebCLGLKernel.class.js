@@ -34,19 +34,27 @@ WebCLGLKernel.prototype.setKernelSource = function(source, header) {
 	for(var n = 0, f = argumentsSource.length; n < f; n++) {
 		if(argumentsSource[n].match(/\*/gm) != null) {
 			if(argumentsSource[n].match(/float4/gm) != null) {
-				this.in_values[n] = {value:undefined,
-						type:'buffer_float4',
-						name:argumentsSource[n].split('*')[1].trim()};
+				this.in_values[n] = {	value:undefined,
+										type:'buffer_float4',
+										name:argumentsSource[n].split('*')[1].trim()};
 			} else if(argumentsSource[n].match(/float/gm) != null) {
-				this.in_values[n] = {value:undefined,
-									type:'buffer_float',
-									name:argumentsSource[n].split('*')[1].trim()};
+				this.in_values[n] = {	value:undefined,
+										type:'buffer_float',
+										name:argumentsSource[n].split('*')[1].trim()};
 			}
 		} else {
-			if(argumentsSource[n].match(/float/gm) != null) {
-				this.in_values[n] = {value:undefined,
-									type:'float',
-									name:argumentsSource[n].split(' ')[1].trim()};
+			if(argumentsSource[n].match(/float4/gm) != null) {
+				this.in_values[n] = {	value:undefined,
+										type:'float4',
+										name:argumentsSource[n].split(' ')[1].trim()};
+			} else if(argumentsSource[n].match(/float/gm) != null) {
+				this.in_values[n] = {	value:undefined,
+										type:'float',
+										name:argumentsSource[n].split(' ')[1].trim()};
+			} else if(argumentsSource[n].match(/mat4/gm) != null) {
+				this.in_values[n] = {	value:undefined,
+										type:'mat4',
+										name:argumentsSource[n].split(' ')[1].trim()};
 			}
 		}
 	}
@@ -101,6 +109,10 @@ WebCLGLKernel.prototype.compile = function() {
 				str += 'uniform sampler2D '+this.in_values[n].name+';\n';
 			} else if(this.in_values[n].type == 'float') {
 				str += 'uniform float '+this.in_values[n].name+';\n';
+			} else if(this.in_values[n].type == 'float4') {
+				str += 'uniform vec4 '+this.in_values[n].name+';\n';
+			} else if(this.in_values[n].type == 'mat4') {
+				str += 'uniform mat4 '+this.in_values[n].name+';\n';
 			}
 		}
 		return str;
@@ -202,7 +214,7 @@ WebCLGLKernel.prototype.setKernelArg = function(argument, data) {
 
 		if(this.in_values[numArg].type == 'buffer_float4' || this.in_values[numArg].type == 'buffer_float') {
 			kp.samplers[this.in_values[numArg].idPointer].value = this.in_values[numArg].value;
-		} else if(this.in_values[numArg].type == 'float') {
+		} else if(this.in_values[numArg].type == 'float' || this.in_values[numArg].type == 'float4' || this.in_values[numArg].type == 'mat4') {
 			kp.uniforms[this.in_values[numArg].idPointer].value = this.in_values[numArg].value;
 		}
 	}
