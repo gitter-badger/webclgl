@@ -147,7 +147,7 @@ WebCLGLWork.prototype.checkArg = function(argument) {
 };
 
 /**
-* Assign value of a argument for all added Kernels and vertexFragmentProgram
+* Assign value of a argument for all added Kernels and vertexFragmentPrograms
 * @param {String} argument Argument to set
 * @param {Array<Float>|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement} value
 * @param {Array<Float>} [splits=[value.length]]
@@ -209,7 +209,7 @@ WebCLGLWork.prototype.setArg = function(argument, value, splits, overrideDimensi
 };
 
 /**
-* setSharedBufferArg
+* Set shared argument from other work
 * @param {String} argument Argument to set
 * @param {WebCLGLWork} clglWork
 */
@@ -231,8 +231,8 @@ WebCLGLWork.prototype.setSharedBufferArg = function(argument, clglWork) {
 };
 
 /**
-* Set indices
-* @returns {}
+* Get all arguments existing in passed kernels & vertexFragmentPrograms
+* @returns {Object}
  */
 WebCLGLWork.prototype.getAllArgs = function() {
 	var args = {};
@@ -260,7 +260,7 @@ WebCLGLWork.prototype.getAllArgs = function() {
 };
 
 /**
-* Set indices
+* Set indices for the geometry passed in vertexFragmentProgram
 * @param {Array<Float>} array
 * @param {Array<Float>} [splits=[array.length]]
  */
@@ -283,7 +283,7 @@ WebCLGLWork.prototype.enqueueNDRangeKernel = function(kernelName, argumentToUpda
 /**
 * Process VertexFragmentProgram
 * @param {String} [argument=undefined] Argument for vertices count or undefined if indices exist
-* @param {String} vertexFragmentProgramName Name of vertexFragmentProgram to execute
+* @param {String} Name (vertexFragmentProgramName) of vertexFragmentProgram to execute
 * @param {Int} drawMode
 * @param {Int} [geometryLength=1] - Length of geometry (1 for points, 3 for triangles...)
  */
