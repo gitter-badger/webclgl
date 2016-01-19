@@ -1324,7 +1324,7 @@
 			
 				
 <dt>
-    <h4 class="name" id="enqueueNDRangeKernel"><span class="type-signature"></span>enqueueNDRangeKernel<span class="signature">(webCLGLKernel, <span class="optional">webCLGLBuffer</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="enqueueNDRangeKernel"><span class="type-signature"></span>enqueueNDRangeKernel<span class="signature">(webCLGLKernel, <span class="optional">webCLGLBuffer</span>, <span class="optional">geometryLength</span>)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -1441,6 +1441,45 @@
         </tr>
 
 	
+
+        <tr>
+            
+                <td class="name"><code>geometryLength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    1
+                
+                </td>
+            
+
+            <td class="description last"><p>Length of geometry (1 for points, 3 for triangles...)</p></td>
+        </tr>
+
+	
 	</tbody>
 </table>
 
@@ -1469,7 +1508,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-267">line 267</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-268">line 268</a>
     </li></ul></dd>
     
 
@@ -1613,7 +1652,7 @@ Read buffer in a specifics WebGL 32bit channel and return the data in one array 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-467">line 467</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-477">line 477</a>
     </li></ul></dd>
     
 
@@ -1753,7 +1792,7 @@ Internally performs one calls to enqueueReadBuffer and return the data in one ar
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-629">line 629</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-639">line 639</a>
     </li></ul></dd>
     
 
@@ -1893,7 +1932,7 @@ Internally performs one calls to enqueueReadBuffer and return the data in one ar
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-541">line 541</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-551">line 551</a>
     </li></ul></dd>
     
 
@@ -2033,7 +2072,7 @@ Internally performs one call to enqueueReadBuffer and return the data in one arr
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-610">line 610</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-620">line 620</a>
     </li></ul></dd>
     
 
@@ -2160,7 +2199,7 @@ Internally performs four calls to enqueueReadBuffer and return the data in one a
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-519">line 519</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-529">line 529</a>
     </li></ul></dd>
     
 
@@ -2231,7 +2270,7 @@ Internally performs four calls to enqueueReadBuffer and return the data in one a
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-456">line 456</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-466">line 466</a>
     </li></ul></dd>
     
 
@@ -2499,7 +2538,7 @@ Internally performs four calls to enqueueReadBuffer and return the data in one a
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-340">line 340</a>
+        <a href="WebCLGL.class.js.html">WebCLGL.class.js</a>, <a href="WebCLGL.class.js.html#sunlight-1-line-350">line 350</a>
     </li></ul></dd>
     
 
@@ -2811,7 +2850,7 @@ Internally performs four calls to enqueueReadBuffer and return the data in one a
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha2</a>
-		on Wed Dec 30 2015 03:18:56 GMT+0100 (CET) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Tue Jan 19 2016 23:06:53 GMT+0100 (CET) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

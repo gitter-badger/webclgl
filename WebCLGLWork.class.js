@@ -274,9 +274,10 @@ WebCLGLWork.prototype.setIndices = function(arr, splits) {
 * Process kernels
 * @param {String} kernelName
 * @param {WebCLGLBuffer} [webCLGLBuffer=undefined]
+* @param {Int} [geometryLength=1] - Length of geometry (1 for points, 3 for triangles...)
  */
-WebCLGLWork.prototype.enqueueNDRangeKernel = function(kernelName, argumentToUpdate) {
-	this.webCLGL.enqueueNDRangeKernel(this.kernels[kernelName], argumentToUpdate);
+WebCLGLWork.prototype.enqueueNDRangeKernel = function(kernelName, argumentToUpdate, geometryLength) {
+	this.webCLGL.enqueueNDRangeKernel(this.kernels[kernelName], argumentToUpdate, geometryLength);
 };
 
 /**

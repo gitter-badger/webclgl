@@ -136,6 +136,7 @@ WebCLGLKernel.prototype.compile = function() {
 
 		'varying vec2 global_id;\n'+
 		'uniform float uBufferWidth;'+
+		'uniform float uGeometryLength;'+
 
 		'vec4 buffer_float4_data(sampler2D arg, vec2 coord) {\n'+
 			'vec4 textureColor = texture2D(arg, coord);\n'+
@@ -151,7 +152,7 @@ WebCLGLKernel.prototype.compile = function() {
 		'}\n'+
 
 		'vec2 get_global_id(float id) {\n'+
-			'float num = id/uBufferWidth;'+
+			'float num = (id*uGeometryLength)/uBufferWidth;'+
 			'float column = fract(num)*uBufferWidth;'+
 			'float row = floor(num);'+
 
