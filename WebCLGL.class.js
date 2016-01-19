@@ -263,8 +263,9 @@ WebCLGL.prototype.enqueueWriteBuffer = function(buffer, arr, flip) {
 * Perform calculation and save the result on a WebCLGLBuffer
 * @param {WebCLGLKernel} webCLGLKernel
 * @param {WebCLGLBuffer} [webCLGLBuffer=undefined]
+* @param {Int} [geometryLength=1] - Length of geometry (1 for points, 3 for triangles...)
 */
-WebCLGL.prototype.enqueueNDRangeKernel = function(webCLGLKernel, webCLGLBuffers) {
+WebCLGL.prototype.enqueueNDRangeKernel = function(webCLGLKernel, webCLGLBuffers, geometryLength) {
 	if(webCLGLBuffers != undefined) {
 		for(var i=0; i < webCLGLBuffers.items.length; i++) {
 			webCLGLBuffer = webCLGLBuffers.items[i];
@@ -273,12 +274,12 @@ WebCLGL.prototype.enqueueNDRangeKernel = function(webCLGLKernel, webCLGLBuffers)
 			this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, webCLGLBuffer.fBuffer);
 			this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, webCLGLBuffer.textureData, 0);
 
-			this.enqueueNDRangeKernelNow(webCLGLKernel, i);
+			this.enqueueNDRangeKernelNow(webCLGLKernel, i, geometryLength);
 		}
 	} else {
 		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
 
-		this.enqueueNDRangeKernelNow(webCLGLKernel);
+		this.enqueueNDRangeKernelNow(webCLGLKernel, 0, geometryLength);
 	}
 };
 
@@ -286,11 +287,15 @@ WebCLGL.prototype.enqueueNDRangeKernel = function(webCLGLKernel, webCLGLBuffers)
  * @private
  * @param {WebCLGLKernel} webCLGLKernel
  * @param {Int} item
+ * @param {Int} [geometryLength=1] - Length of geometry (1 for points, 3 for triangles...)
  */
-WebCLGL.prototype.enqueueNDRangeKernelNow = function(webCLGLKernel, i) {
+WebCLGL.prototype.enqueueNDRangeKernelNow = function(webCLGLKernel, i, geometryLength) {
 	var kp = webCLGLKernel.kernelPrograms[0];
 	this.gl.useProgram(kp.kernel);
 
+	var _geometryLength = (geometryLength != undefined) ? geometryLength : 1;
+	this.gl.uniform1f(kp.uGeometryLength, _geometryLength);
+	
 	var currentTextureUnit = 0;
 	for(var n = 0, f = kp.samplers.length; n < f; n++) {
 		var ks = kp.samplers[n];

@@ -17,6 +17,7 @@ WebCLGLKernelProgram = function(gl, sv, sf, in_values) {
 	this.attr_TextureCoord = this.gl.getAttribLocation(this.kernel, "aTextureCoord");	
 
 	this.uBufferWidth = this.gl.getUniformLocation(this.kernel, "uBufferWidth");
+	this.uGeometryLength = this.gl.getUniformLocation(this.kernel, "uGeometryLength");
 	
 	for(var n = 0, f = in_values.length; n < f; n++) {
 		if(in_values[n].type == 'buffer_float4' || in_values[n].type == 'buffer_float') {
