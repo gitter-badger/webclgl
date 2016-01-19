@@ -187,7 +187,7 @@ WebCLGLKernel.prototype.compile = function() {
 * Bind float or a WebCLGLBuffer to a kernel argument
 * @type Void
 * @param {Int|String} argument Id of argument or name of this
-* @param {Float|Int|WebCLGLBuffer} data
+* @param {Float|Int|Array<Float4>|Array<Mat4>|WebCLGLBuffer} data
 */
 WebCLGLKernel.prototype.setKernelArg = function(argument, data) {
 	if(data == undefined) alert("Error in setKernelArg("+argument+", data) (this data is undefined)");

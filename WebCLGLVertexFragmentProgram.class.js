@@ -387,9 +387,8 @@ WebCLGLVertexFragmentProgram.prototype.compileVertexFragmentSource = function() 
 
 /**
 * Bind float, mat4 or a WebCLGLBuffer to a vertex argument
-* @type Void
 * @param {Int|String} argument Id of argument or name of this
-* @param {Float|Int|WebCLGLBuffer} data
+* @param {Float|Int|Array<Float4>|Array<Mat4>|WebCLGLBuffer} data
 */
 WebCLGLVertexFragmentProgram.prototype.setVertexArg = function(argument, data) {
 	if(data == undefined) alert("Error: setVertexArg("+argument+", undefined)");
@@ -423,9 +422,8 @@ WebCLGLVertexFragmentProgram.prototype.setVertexArg = function(argument, data) {
 };
 /**
 * Bind float or a WebCLGLBuffer to a fragment argument
-* @type Void
 * @param {Int|String} argument Id of argument or name of this
-* @param {Float|Int|WebCLGLBuffer} data
+* @param {Float|Int|Array<Float4>|Array<Mat4>|WebCLGLBuffer} data
 */
 WebCLGLVertexFragmentProgram.prototype.setFragmentArg = function(argument, data) {
 	if(data == undefined) alert("Error: setFragmentArg("+argument+", undefined)");
