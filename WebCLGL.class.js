@@ -170,6 +170,10 @@ WebCLGL.prototype.copy = function(valuesToRead, valuesToWrite) {
 WebCLGL.prototype.copyItem = function(valueToRead, valueToWrite) {
 	if(valueToRead instanceof WebCLGLBufferItem) {
 		this.gl.viewport(0, 0, valueToWrite.W, valueToWrite.H);
+		if(valueToWrite.fBuffer == undefined) {
+			valueToWrite.createWebGLRenderBuffer();
+			valueToWrite.createWebGLFrameBuffer();
+		}
 		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, valueToWrite.fBuffer);
 		this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, valueToWrite.textureData, 0);
 	} else if(valueToRead instanceof WebGLTexture)
@@ -270,11 +274,17 @@ WebCLGL.prototype.enqueueNDRangeKernel = function(webCLGLKernel, webCLGLBuffers,
 		for(var i=0; i < webCLGLBuffers.items.length; i++) {
 			webCLGLBuffer = webCLGLBuffers.items[i];
 
-			this.gl.viewport(0, 0, webCLGLBuffer.W, webCLGLBuffer.H);
-			this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, webCLGLBuffer.fBuffer);
-			this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, webCLGLBuffer.textureData, 0);
-
-			this.enqueueNDRangeKernelNow(webCLGLKernel, i, geometryLength);
+			if(webCLGLBuffer.length > 0) {
+				this.gl.viewport(0, 0, webCLGLBuffer.W, webCLGLBuffer.H);
+				if(webCLGLBuffer.fBuffer == undefined) {
+					webCLGLBuffer.createWebGLRenderBuffer();
+					webCLGLBuffer.createWebGLFrameBuffer();
+				}
+				this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, webCLGLBuffer.fBuffer);
+				this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, webCLGLBuffer.textureData, 0);
+	
+				this.enqueueNDRangeKernelNow(webCLGLKernel, i, geometryLength);
+			}
 		}
 	} else {
 		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
@@ -497,15 +507,27 @@ WebCLGL.prototype.enqueueReadBuffer = function(buffer, item) {
 
 	var arrLength = buffer.length*4;
 	if(item == 0) {
+    	if(buffer.outArray4Uint8ArrayX == undefined) {
+            buffer.outArray4Uint8ArrayX = new Uint8Array((buffer.W*buffer.H)*4);
+        }
 		this.gl.readPixels(0, 0, buffer.W, buffer.H, this.gl.RGBA, this.gl.UNSIGNED_BYTE, buffer.outArray4Uint8ArrayX);
 		return buffer.outArray4Uint8ArrayX.slice(0, arrLength);
 	} else if(item == 1) {
+        if(buffer.outArray4Uint8ArrayY == undefined) {
+            buffer.outArray4Uint8ArrayY = new Uint8Array((buffer.W*buffer.H)*4);
+        }
 		this.gl.readPixels(0, 0, buffer.W, buffer.H, this.gl.RGBA, this.gl.UNSIGNED_BYTE, buffer.outArray4Uint8ArrayY);
 		return buffer.outArray4Uint8ArrayY.slice(0, arrLength);
 	} else if(item == 2) {
+        if(buffer.outArray4Uint8ArrayZ == undefined) {
+            buffer.outArray4Uint8ArrayZ = new Uint8Array((buffer.W*buffer.H)*4);
+        }
 		this.gl.readPixels(0, 0, buffer.W, buffer.H, this.gl.RGBA, this.gl.UNSIGNED_BYTE, buffer.outArray4Uint8ArrayZ);
 		return buffer.outArray4Uint8ArrayZ.slice(0, arrLength);
 	} else if(item == 3) {
+        if(buffer.outArray4Uint8ArrayW == undefined) {
+            buffer.outArray4Uint8ArrayW = new Uint8Array((buffer.W*buffer.H)*4);
+        }
 		this.gl.readPixels(0, 0, buffer.W, buffer.H, this.gl.RGBA, this.gl.UNSIGNED_BYTE, buffer.outArray4Uint8ArrayW);
 		return buffer.outArray4Uint8ArrayW.slice(0, arrLength);
 	}

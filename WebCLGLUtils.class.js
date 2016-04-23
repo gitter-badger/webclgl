@@ -56,16 +56,36 @@ WebCLGLUtils.prototype.loadQuad = function(node, length, height) {
 /** @private **/
 WebCLGLUtils.prototype.getWebGLContextFromCanvas = function(canvas, ctxOpt) {
 	var gl;
-	try {
-		if(ctxOpt == undefined) gl = canvas.getContext("webgl");
-		else gl = canvas.getContext("webgl", ctxOpt);
-	} catch(e) {
-		gl = null;
+    try {
+        if(ctxOpt == undefined) gl = canvas.getContext("webgl2");
+        else gl = canvas.getContext("webgl2", ctxOpt);
+        console.log("webgl2");
+    } catch(e) {
+        gl = null;
+    }
+    if(gl == null) {
+        try {
+            if(ctxOpt == undefined) gl = canvas.getContext("experimental-webgl2");
+            else gl = canvas.getContext("experimental-webgl2", ctxOpt);
+            console.log("experimental-webgl2");
+        } catch(e) {
+            gl = null;
+        }
+    }
+    if(gl == null) {
+        try {
+            if(ctxOpt == undefined) gl = canvas.getContext("webgl");
+            else gl = canvas.getContext("webgl", ctxOpt);
+            console.log("webgl");
+        } catch(e) {
+            gl = null;
+        }
     }
 	if(gl == null) {
 		try {
 			if(ctxOpt == undefined) gl = canvas.getContext("experimental-webgl");
 			else gl = canvas.getContext("experimental-webgl", ctxOpt);
+            console.log("experimental-webgl");
 		} catch(e) {
 			gl = null;
 		}
