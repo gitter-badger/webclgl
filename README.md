@@ -14,10 +14,10 @@ Not 100% the same as the future <a href="https://en.wikipedia.org/wiki/WebCL">We
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/using_vectors_as_output/index.html"> Using vectors as output</a><br />
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/compare_values_with_other_ids/index.html"> Compare values with other ids</a><br />
 
-<h3>Demos</h3>
+<h3>Other advanced demos</h3>
 - <a href="#"> Handling several WebCLGLKernels with WebCLGLWork class</a> (coming soon)<br />
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/WebCLGLWork_3D_graphics/index.html"> Graphic output using WebCLGLWork (for to handle several WebCLGLKernels, WebCLGLVertexFragmentProgram & WebCLGLBuffer)</a> <br />
-- <a href="https://github.com/stormcolor/SCEJS"> SCEJS</a> use WebCLGL as low level layer. You can See the prefabs of this for advanced examples
+- <a href="https://github.com/stormcolor/SCEJS"> SCEJS</a> use WebCLGL as low level layer. You can See this for advanced examples
 
 <h3><a href="https://rawgit.com/stormcolor/webclgl/master/APIdoc/APIdoc/WebCLGL.html">API Doc WebCLGL</a></h3>
 <h3><a href="http://www.khronos.org/files/webgl/webgl-reference-card-1_0.pdf">OpenGL ES Shading Language 1.0 Reference Card (Pag 3-4)</a></h3>
