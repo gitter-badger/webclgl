@@ -203,6 +203,7 @@
 			updatePP(clglWork);
 
       		clglWork.setArg("nodeId", arrayNodeId);
+            clglWork.setUpdateFromKernel("posXYZW");
 			clglWork.setArg("posXYZW", arrayNodePosXYZW);
 			clglWork.setArg("nodeVertexPos", arrayNodeVertexPos);
 			clglWork.setArg("nodeVertexCol", arrayNodeVertexColor);
@@ -213,6 +214,7 @@
 			for(var n=0; n < arrayNodePosXYZW.length/4; n++) {
 				arrayNodeDir.push(x, y, z, 255);
 			}
+            clglWork.setUpdateFromKernel("dir");
 			clglWork.setArg("dir", arrayNodeDir);
 
 
