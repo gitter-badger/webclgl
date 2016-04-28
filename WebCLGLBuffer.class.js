@@ -5,6 +5,8 @@
 * @property {Float} length
 */
 WebCLGLBuffer = function(gl, length, type, offset, linear, mode, splits) {
+    "use strict";
+
 	this.gl = gl;
 	this.length = (length.constructor === Array) ? [length[0],length[1]] : length;
 	this.type = type;
@@ -15,7 +17,7 @@ WebCLGLBuffer = function(gl, length, type, offset, linear, mode, splits) {
 	
 	this.items = [];
 	var countArr = this.length;
-	currItem = 0;
+	var currItem = 0;
 	if(this.length.constructor !== Array) {		
 		while(true) {
 			var spl = (currItem == 0) ? this.splits[currItem] : this.splits[currItem]-this.splits[currItem-1];
@@ -42,7 +44,6 @@ WebCLGLBuffer = function(gl, length, type, offset, linear, mode, splits) {
      * Write WebGLTexture buffer
      * @param {Array|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement} array
      * @param {Bool} [flip=false]
-     * @type Void
      */
     this.writeWebGLTextureBuffer = function(arr, flip) {
         var m = (this.type == "FLOAT4") ? 4 : 1;
@@ -61,7 +62,6 @@ WebCLGLBuffer = function(gl, length, type, offset, linear, mode, splits) {
      * Write WebGL buffer
      * @param {Array|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement} array
      * @param {Bool} [flip=false]
-     * @type Void
      */
     this.writeWebGLBuffer = function(arr, flip) {
         var m = (this.type == "FLOAT4") ? 4 : 1;
@@ -78,7 +78,6 @@ WebCLGLBuffer = function(gl, length, type, offset, linear, mode, splits) {
 
     /**
      * Remove this buffer
-     * @type Void
      */
     this.remove = function() {
         for(var n=0; n < this.items.length; n++) {

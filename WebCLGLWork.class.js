@@ -4,6 +4,8 @@
 * @constructor
 */
 WebCLGLWork = function(webCLGL, offset) {
+    "use strict";
+
 	this.webCLGL = webCLGL;
 	this.offset = (offset != undefined) ? offset : 100.0;
 
@@ -184,11 +186,11 @@ WebCLGLWork = function(webCLGL, offset) {
             }
             var spl = (splits != undefined) ? splits : [length];
 
-            buff = this.webCLGL.createBuffer(length, type, this.offset, false, mode, spl);
+            var buff = this.webCLGL.createBuffer(length, type, this.offset, false, mode, spl);
             this.webCLGL.enqueueWriteBuffer(buff, value);
             this.buffers[argument] = buff;
             if(this.updatedFromKernel.hasOwnProperty(argument) == true) {
-                buffTMP = this.webCLGL.createBuffer(length, type, this.offset, false, mode, spl);
+                var buffTMP = this.webCLGL.createBuffer(length, type, this.offset, false, mode, spl);
                 this.webCLGL.enqueueWriteBuffer(buffTMP, value);
                 this.buffers_TEMP[argument] = buffTMP;
             }
@@ -299,7 +301,7 @@ WebCLGLWork = function(webCLGL, offset) {
      */
     this.enqueueVertexFragmentProgram = function(argument, vertexFragmentProgramName, drawMode, geometryLength) {
         var buff = (this.CLGL_bufferIndices != undefined) ? this.CLGL_bufferIndices : this.buffers[argument];
-        if(buff.length > 0) this.webCLGL.enqueueVertexFragmentProgram(this.vertexFragmentPrograms[vertexFragmentProgramName], buff, drawMode, geometryLength);
+        if(buff != undefined && buff.length > 0) this.webCLGL.enqueueVertexFragmentProgram(this.vertexFragmentPrograms[vertexFragmentProgramName], buff, drawMode, geometryLength);
     };
 };
 
