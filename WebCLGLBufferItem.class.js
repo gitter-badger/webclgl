@@ -34,15 +34,15 @@ WebCLGLBufferItem = function(gl, length, type, offset, linear, mode) {
 
     // readPixel arrays
     //this.outArray4Uint8ArrayX = new Uint8Array((this.W*this.H)*4);
-//	this.outArray4Uint8ArrayY = new Uint8Array((this.W*this.H)*4);
-//	this.outArray4Uint8ArrayZ = new Uint8Array((this.W*this.H)*4);
-//	this.outArray4Uint8ArrayW = new Uint8Array((this.W*this.H)*4);
-    /*this.outArray4x4Uint8Array = new Uint8Array((this.W*this.H)*4*4);*/
+    //	this.outArray4Uint8ArrayY = new Uint8Array((this.W*this.H)*4);
+    //	this.outArray4Uint8ArrayZ = new Uint8Array((this.W*this.H)*4);
+    //	this.outArray4Uint8ArrayW = new Uint8Array((this.W*this.H)*4);
+        /*this.outArray4x4Uint8Array = new Uint8Array((this.W*this.H)*4*4);*/
 
-//	this.Packet4Uint8Array_Float = []; // [this.outArray4Uint8ArrayX]
-//	this.Float = []; // [unpack(this.outArray4Uint8ArrayX)]
-//	this.Packet4Uint8Array_Float4 = []; // [this.outArray4Uint8ArrayX, ..Y, ..Z, ..W]
-//	this.Float4 = []; // [unpack(this.outArray4Uint8ArrayX), unpack(..Y), unpack(..Z), unpack(..W)]
+    //	this.Packet4Uint8Array_Float = []; // [this.outArray4Uint8ArrayX]
+    //	this.Float = []; // [unpack(this.outArray4Uint8ArrayX)]
+    //	this.Packet4Uint8Array_Float4 = []; // [this.outArray4Uint8ArrayX, ..Y, ..Z, ..W]
+    //	this.Float4 = []; // [unpack(this.outArray4Uint8ArrayX), unpack(..Y), unpack(..Z), unpack(..W)]
 
 
     // Create FrameBuffer & RenderBuffer
@@ -58,7 +58,7 @@ WebCLGLBufferItem = function(gl, length, type, offset, linear, mode) {
     this.initialize = function() {
         if(this.mode == "FRAGMENT" || this.mode == "VERTEX_FROM_KERNEL" || this.mode == "VERTEX_AND_FRAGMENT") {
             // Create WebGLTexture buffer
-            this.textureData = this.createWebGLTextureBuffer();
+            this.textureData = createWebGLTextureBuffer();
 
             if(this.mode == "VERTEX_FROM_KERNEL") {
                 //          this.createWebGLRenderBuffer();
@@ -67,7 +67,7 @@ WebCLGLBufferItem = function(gl, length, type, offset, linear, mode) {
         }
         if(this.mode == "VERTEX" || this.mode == "VERTEX_INDEX" || this.mode == "VERTEX_FROM_KERNEL" || this.mode == "VERTEX_AND_FRAGMENT") {
             // Create WebGL buffer
-            this.vertexData0 = this.createWebGLBuffer();
+            this.vertexData0 = createWebGLBuffer();
         }
     };
 
@@ -86,9 +86,8 @@ WebCLGLBufferItem = function(gl, length, type, offset, linear, mode) {
 
     /**
      * Create the WebGLTexture buffer
-     * @type Void
      */
-    this.createWebGLTextureBuffer = function() {
+    var createWebGLTextureBuffer = (function() {
         _gl.pixelStorei(_gl.UNPACK_FLIP_Y_WEBGL, false);
         _gl.pixelStorei(_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
 
@@ -108,23 +107,21 @@ WebCLGLBufferItem = function(gl, length, type, offset, linear, mode) {
         }
 
         return textureData;
-    };
+    }).bind(this);
 
     /**
      * Create the WebGL buffer
-     * @type Void
      */
-    this.createWebGLBuffer = function() {
+    var createWebGLBuffer = (function() {
         var vertexData = _gl.createBuffer();
 
         return vertexData;
-    };
+    }).bind(this);
 
     /**
      * Write WebGLTexture buffer
      * @param {Array|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement} array
      * @param {Bool} [flip=false]
-     * @type Void
      */
     this.writeWebGLTextureBuffer = function(arr, flip) {
         inData = arr;
@@ -181,7 +178,6 @@ WebCLGLBufferItem = function(gl, length, type, offset, linear, mode) {
      * Write WebGL buffer
      * @param {Array|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement} array
      * @param {Bool} [flip=false]
-     * @type Void
      */
     this.writeWebGLBuffer = function(arr, flip) {
         inData = arr;
@@ -196,7 +192,6 @@ WebCLGLBufferItem = function(gl, length, type, offset, linear, mode) {
 
     /**
      * Remove this buffer
-     * @type Void
      */
     this.remove = function() {
         _gl.deleteRenderbuffer(this.rBuffer);
