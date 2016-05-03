@@ -40,9 +40,9 @@ WebCLGLKernel = function(gl, source, header) {
                             var regexp = new RegExp(name+'\\['+vari.trim()+'\\]',"gm");
 
                             if(this.in_values[n].type == 'buffer_float4')
-                                source = source.replace(regexp, 'buffer_float4_data('+name+','+vari+')');
+                                source = source.replace(regexp, 'texture2D('+name+','+vari+')');
                             if(this.in_values[n].type == 'buffer_float')
-                                source = source.replace(regexp, 'buffer_float_data('+name+','+vari+')');
+                                source = source.replace(regexp, 'texture2D('+name+','+vari+').x');
                         }
                     }
                 }
@@ -79,51 +79,38 @@ WebCLGLKernel = function(gl, source, header) {
                 'varying vec2 global_id;\n'+
 
                 'void main(void) {\n'+
-                'gl_Position = vec4(aVertexPosition, 1.0);\n'+
-                'global_id = aTextureCoord;\n'+
+                    'gl_Position = vec4(aVertexPosition, 1.0);\n'+
+                    'global_id = aTextureCoord;\n'+
                 '}\n';
             var sourceFragment = _precision+
 
                 lines_attrs()+
 
-                    //this.utils.unpackGLSLFunctionString()+
-
                 'varying vec2 global_id;\n'+
                 'uniform float uBufferWidth;'+
                 'uniform float uGeometryLength;'+
 
-                'vec4 buffer_float4_data(sampler2D arg, vec2 coord) {\n'+
-                'vec4 textureColor = texture2D(arg, coord);\n'+
-                'return textureColor;\n'+
-                '}\n'+
-                'float buffer_float_data(sampler2D arg, vec2 coord) {\n'+
-                'vec4 textureColor = texture2D(arg, coord);\n'+
-                'return textureColor.x;\n'+
-                '}\n'+
-
                 'vec2 get_global_id() {\n'+
-                'return global_id;\n'+
+                    'return global_id;\n'+
                 '}\n'+
 
                 'vec2 get_global_id(float id) {\n'+
-                'float num = (id*uGeometryLength)/uBufferWidth;'+
-                'float column = fract(num)*uBufferWidth;'+
-                'float row = floor(num);'+
+                    'float num = (id*uGeometryLength)/uBufferWidth;'+
+                    'float column = fract(num)*uBufferWidth;'+
+                    'float row = floor(num);'+
 
-                'float ts = 1.0/(uBufferWidth-1.0);'+
-                'float xx = column*ts;'+
-                'float yy = row*ts;'+
+                    'float ts = 1.0/(uBufferWidth-1.0);'+
 
-                'return vec2(xx, yy);'+
+                    'return vec2(column*ts, row*ts);'+
                 '}\n'+
 
                 _head+
 
                 'void main(void) {\n'+
-                'float out_float = -999.99989;\n'+
-                'vec4 out_float4;\n'+
+                    'float out_float = -999.99989;\n'+
+                    'vec4 out_float4;\n'+
 
-                _source;
+                    _source;
 
 
 
