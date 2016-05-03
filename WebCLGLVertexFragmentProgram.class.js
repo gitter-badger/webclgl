@@ -74,29 +74,18 @@ WebCLGLVertexFragmentProgram = function(gl, vertexSource, vertexHeader, fragment
 
             _utils.unpackGLSLFunctionString()+
 
-            'vec4 buffer_float4_fromKernel_data(sampler2D arg, vec2 coord) {\n'+
-            'vec4 textureColor = texture2D(arg, coord);\n'+
-            'return textureColor;\n'+
-            '}\n'+
-            'float buffer_float_fromKernel_data(sampler2D arg, vec2 coord) {\n'+
-            'vec4 textureColor = texture2D(arg, coord);\n'+
-            'return textureColor.x;\n'+
-            '}\n'+
-
             'vec2 get_global_id() {\n'+
-            'return vec2(0.0, 0.0);\n'+
+                'return vec2(0.0, 0.0);\n'+
             '}\n'+
 
             'vec2 get_global_id(float id) {\n'+
-            'float num = (id*uGeometryLength)/uBufferWidth;'+
-            'float column = fract(num)*uBufferWidth;'+
-            'float row = floor(num);'+
+                'float num = (id*uGeometryLength)/uBufferWidth;'+
+                'float column = fract(num)*uBufferWidth;'+
+                'float row = floor(num);'+
 
-            'float ts = 1.0/(uBufferWidth-1.0);'+
-            'float xx = column*ts;'+
-            'float yy = row*ts;'+
+                'float ts = 1.0/(uBufferWidth-1.0);'+
 
-            'return vec2(xx, yy);'+
+                'return vec2(column*ts, row*ts);'+
             '}\n'+
 
             _vertexHead+
@@ -111,17 +100,8 @@ WebCLGLVertexFragmentProgram = function(gl, vertexSource, vertexHeader, fragment
 
             lines_fragment_attrs()+
 
-            'vec4 buffer_float4_data(sampler2D arg, vec2 coord) {\n'+
-            'vec4 textureColor = texture2D(arg, coord);\n'+
-            'return textureColor;\n'+
-            '}\n'+
-            'float buffer_float_data(sampler2D arg, vec2 coord) {\n'+
-            'vec4 textureColor = texture2D(arg, coord);\n'+
-            'return textureColor.x;\n'+
-            '}\n'+
-
             'vec2 get_global_id() {\n'+
-            'return vec2(0.0, 0.0);\n'+
+                'return vec2(0.0, 0.0);\n'+
             '}\n'+
 
             _fragmentHead+
@@ -219,9 +199,9 @@ WebCLGLVertexFragmentProgram = function(gl, vertexSource, vertexHeader, fragment
                             var regexp = new RegExp(name+'\\['+vari.trim()+'\\]',"gm");
 
                             if(this.in_vertex_values[n].type == 'buffer_float4_fromKernel')
-                                source = source.replace(regexp, 'buffer_float4_fromKernel_data('+name+','+vari+')');
+                                source = source.replace(regexp, 'texture2D('+name+','+vari+')');
                             if(this.in_vertex_values[n].type == 'buffer_float_fromKernel')
-                                source = source.replace(regexp, 'buffer_float_fromKernel_data('+name+','+vari+')');
+                                source = source.replace(regexp, 'texture2D('+name+','+vari+').x');
                             if(this.in_vertex_values[n].type == 'buffer_float4')
                                 source = source.replace(regexp, name);
                             if(this.in_vertex_values[n].type == 'buffer_float')
@@ -327,9 +307,9 @@ WebCLGLVertexFragmentProgram = function(gl, vertexSource, vertexHeader, fragment
                             var regexp = new RegExp(name+'\\['+vari.trim()+'\\]',"gm");
 
                             if(this.in_fragment_values[n].type == 'buffer_float4')
-                                source = source.replace(regexp, 'buffer_float4_data('+name+','+vari+')');
+                                source = source.replace(regexp, 'texture2D('+name+','+vari+')');
                             if(this.in_fragment_values[n].type == 'buffer_float')
-                                source = source.replace(regexp, 'buffer_float_data('+name+','+vari+')');
+                                source = source.replace(regexp, 'texture2D('+name+','+vari+').x');
                         }
                     }
                 }
