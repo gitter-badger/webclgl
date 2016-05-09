@@ -89,7 +89,7 @@ WebCLGLWork = function(webCLGL, offset) {
     /**
      * @private
      */
-    this.checkArg = function(argument) {
+    this.checkArg = function(argument, value) {
         kernelPr = [];
         vPr = [];
         fPr = [];
@@ -152,6 +152,10 @@ WebCLGLWork = function(webCLGL, offset) {
                 }
             }
         }
+
+        if(kernelPr.length == 0 && usedInVertex == false && usedInFragment == false &&
+            (value instanceof Array || value instanceof Float32Array || value instanceof Uint8Array || value instanceof HTMLImageElement))
+            isBuffer = true;
     };
 
     /**
@@ -163,7 +167,7 @@ WebCLGLWork = function(webCLGL, offset) {
      * @returns {WebCLGLBuffer}
      */
     this.setArg = function(argument, value, splits, overrideDimensions) {
-        this.checkArg(argument);
+        this.checkArg(argument, value);
 
         if(isBuffer == true) {
             var mode = "SAMPLER"; // "ATTRIBUTE", "SAMPLER", "UNIFORM"
