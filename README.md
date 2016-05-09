@@ -18,7 +18,6 @@ var arrayResult = gpufor({"float* A": arrayA, "float* B": arrayB}, "n",
                           "return sum;");
 
 ```
-<h3>gpufor demo</h3>
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/gpufor/index.html"> gpufor basic example A+B</a><br />
 
 <h3>Other specifics demos (whithout use gpufor function)</h3>
