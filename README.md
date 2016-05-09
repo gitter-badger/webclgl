@@ -51,10 +51,10 @@ main(float4* nodePosition) { <br />
 (arguments type sampler2D (no attribute) allow be writed by a kernel program) <br />
  <br />
  <br />
-Deleted optional geometryLength argument in enqueueNDRangeKernel & enqueueVertexFragmentProgram. It is indicated through glsl code with next available methods: <br />
-- get_global_id(ID, bufferWidth, geometryLength) (in Kernels & vertex of VFP) (The last get_global_id(ID) is removed) <br />
-- get_global_id(vec2(row, col), bufferWidth) (in Kernels & fragment of VFP)function  Available <br />
-- get_global_id() (only in Kernels fot to get) <br />
+- Deleted optional geometryLength argument in enqueueNDRangeKernel & enqueueVertexFragmentProgram. It is indicated through glsl code with next available methods: <br />
+get_global_id(ID, bufferWidth, geometryLength) (in Kernels & vertex of VFP) (The last get_global_id(ID) is removed) <br />
+get_global_id(vec2(row, col), bufferWidth) (in Kernels & fragment of VFP) <br />
+get_global_id() (only in Kernels fot to get) <br />
  <br />
 Changed method setUpdateFromKernel to setAllowKernelWriting in WebCLGLWork <br />
 
