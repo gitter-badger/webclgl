@@ -30,42 +30,16 @@ WebCLGLBufferItem = function(gl, length, type, offset, linear, mode) {
 
     var inData; // enqueueWriteBuffer user data
 
-    this.mode = (mode != undefined) ? mode : "FRAGMENT"; // "FRAGMENT", "VERTEX", "VERTEX_INDEX", "VERTEX_FROM_KERNEL", "VERTEX_AND_FRAGMENT"
+    this.mode = (mode != undefined) ? mode : "SAMPLER"; // "SAMPLER", "ATTRIBUTE", "VERTEX_INDEX"
 
-    // readPixel arrays
-    //this.outArray4Uint8ArrayX = new Uint8Array((this.W*this.H)*4);
-    //	this.outArray4Uint8ArrayY = new Uint8Array((this.W*this.H)*4);
-    //	this.outArray4Uint8ArrayZ = new Uint8Array((this.W*this.H)*4);
-    //	this.outArray4Uint8ArrayW = new Uint8Array((this.W*this.H)*4);
-        /*this.outArray4x4Uint8Array = new Uint8Array((this.W*this.H)*4*4);*/
-
-    //	this.Packet4Uint8Array_Float = []; // [this.outArray4Uint8ArrayX]
-    //	this.Float = []; // [unpack(this.outArray4Uint8ArrayX)]
-    //	this.Packet4Uint8Array_Float4 = []; // [this.outArray4Uint8ArrayX, ..Y, ..Z, ..W]
-    //	this.Float4 = []; // [unpack(this.outArray4Uint8ArrayX), unpack(..Y), unpack(..Z), unpack(..W)]
-
-
-    // Create FrameBuffer & RenderBuffer
-    /*this.rBuffer = _gl.createRenderbuffer();
-     _gl.bindRenderbuffer(_gl.RENDERBUFFER, this.rBuffer);
-     _gl.renderbufferStorage(_gl.RENDERBUFFER, _gl.DEPTH_COMPONENT16, this.W, this.H);
-     _gl.bindRenderbuffer(_gl.RENDERBUFFER, null);
-
-     this.fBuffer = _gl.createFramebuffer();
-     _gl.bindFramebuffer(_gl.FRAMEBUFFER, this.fBuffer);
-     _gl.framebufferRenderbuffer(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT, _gl.RENDERBUFFER, this.rBuffer);*/
 
     this.initialize = function() {
-        if(this.mode == "FRAGMENT" || this.mode == "VERTEX_FROM_KERNEL" || this.mode == "VERTEX_AND_FRAGMENT") {
+        if(this.mode == "SAMPLER") {
             // Create WebGLTexture buffer
             this.textureData = createWebGLTextureBuffer();
-
-            if(this.mode == "VERTEX_FROM_KERNEL") {
-                //          this.createWebGLRenderBuffer();
-//            this.createWebGLFrameBuffer();
-            }
+            this.vertexData0 = createWebGLBuffer();
         }
-        if(this.mode == "VERTEX" || this.mode == "VERTEX_INDEX" || this.mode == "VERTEX_FROM_KERNEL" || this.mode == "VERTEX_AND_FRAGMENT") {
+        if(this.mode == "ATTRIBUTE" || this.mode == "VERTEX_INDEX") {
             // Create WebGL buffer
             this.vertexData0 = createWebGLBuffer();
         }
@@ -184,7 +158,7 @@ WebCLGLBufferItem = function(gl, length, type, offset, linear, mode) {
         if(this.mode == "VERTEX_INDEX") { // "VERTEX_INDEX" ELEMENT_ARRAY_BUFFER
             _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, this.vertexData0);
             _gl.bufferData(_gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(arr), _gl.DYNAMIC_DRAW);
-        } else { // "VERTEX" || "VERTEX_AND_FRAGMENT" ARRAY_BUFFER
+        } else { // "ATTRIBUTE" ARRAY_BUFFER
             _gl.bindBuffer(_gl.ARRAY_BUFFER, this.vertexData0);
             _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(arr), _gl.DYNAMIC_DRAW);
         }
@@ -197,10 +171,10 @@ WebCLGLBufferItem = function(gl, length, type, offset, linear, mode) {
         _gl.deleteRenderbuffer(this.rBuffer);
         _gl.deleteFramebuffer(this.fBuffer);
 
-        if(this.mode == "FRAGMENT" || this.mode == "VERTEX_FROM_KERNEL" || this.mode == "VERTEX_AND_FRAGMENT")
+        if(this.mode == "SAMPLER")
             _gl.deleteTexture(this.textureData);
 
-        if(this.mode == "VERTEX" || this.mode == "VERTEX_INDEX" || this.mode == "VERTEX_FROM_KERNEL" || this.mode == "VERTEX_AND_FRAGMENT")
+        if(this.mode == "ATTRIBUTE" || this.mode == "VERTEX_INDEX")
             _gl.deleteBuffer(this.vertexData0);
     };
 };

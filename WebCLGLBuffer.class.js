@@ -12,7 +12,7 @@ WebCLGLBuffer = function(gl, length, type, offset, linear, mode, splits) {
 	this.type = type;
 	this.offset = offset;
 	this.linear = linear;
-	this.mode = (mode != undefined) ? mode : "FRAGMENT"; // "FRAGMENT", "VERTEX", "VERTEX_INDEX", "VERTEX_FROM_KERNEL", "VERTEX_AND_FRAGMENT" 
+	this.mode = (mode != undefined) ? mode : "SAMPLER"; // "SAMPLER", "ATTRIBUTE", "VERTEX_INDEX"
 	this.splits = (splits != undefined) ? splits : [this.length];
 	
 	this.items = [];
