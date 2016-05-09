@@ -45,10 +45,6 @@
 						</li>
 						
 						<li>
-							<a href="WebCLGLKernelProgram.html">WebCLGLKernelProgram</a>
-						</li>
-						
-						<li>
 							<a href="WebCLGLUtils.html">WebCLGLUtils</a>
 						</li>
 						
@@ -93,9 +89,23 @@ WebCLGLKernel = function(gl, source, header) {
 	var highPrecisionSupport = _gl.getShaderPrecisionFormat(_gl.FRAGMENT_SHADER, _gl.HIGH_FLOAT);
 	var _precision = (highPrecisionSupport.precision != 0) ? 'precision highp float;\n\nprecision highp int;\n\n' : 'precision lowp float;\n\nprecision lowp int;\n\n';
 
-    var _head;
-    var _source;
-	this.in_values = [];
+	this.in_values = {};
+
+    /**
+     * checkArgNameInitialization
+     * @param {Object} inValues
+     * @param {String} argName
+     * @private
+     */
+    var checkArgNameInitialization = (function(inValues, argName) {
+        if(inValues.hasOwnProperty(argName) == false) {
+            var inValue = { "type": null, //
+                            "expectedMode": null, // "ATTRIBUTE", "SAMPLER", "UNIFORM"
+                            "value": null, // Float|Int|Array&lt;Float4>|Array&lt;Mat4>|WebCLGLBuffer
+                            "location": null};
+            inValues[argName] = inValue;
+        }
+    }).bind(this);
 
     /**
      * Update the kernel source
@@ -109,9 +119,9 @@ WebCLGLKernel = function(gl, source, header) {
          */
         var parse = (function(source) {
             //console.log(source);
-            for(var n = 0, f = this.in_values.length; n &lt; f; n++) { // for each in_values (in argument)
-                var regexp = new RegExp(this.in_values[n].name+'\\[\\w*\\]',"gm");
-                var varMatches = source.match(regexp);// "Search current "in_values.name[xxx]" in source and store in array varMatches
+            for(var key in this.in_values) { // for each in_values (in argument)
+                var regexp = new RegExp(key+"\\[.*?\\]","gm");
+                var varMatches = source.match(regexp);// "Search current "argName" in source and store in array varMatches
                 //console.log(varMatches);
                 if(varMatches != null) {
                     for(var nB = 0, fB = varMatches.length; nB &lt; fB; nB++) { // for each varMatches ("A[x]", "A[x]")
@@ -120,12 +130,11 @@ WebCLGLKernel = function(gl, source, header) {
                         if(regexpNativeGLMatches == null) {
                             var name = varMatches[nB].split('[')[0];
                             var vari = varMatches[nB].split('[')[1].split(']')[0];
-                            var regexp = new RegExp(name+'\\['+vari.trim()+'\\]',"gm");
 
-                            if(this.in_values[n].type == 'buffer_float4')
-                                source = source.replace(regexp, 'buffer_float4_data('+name+','+vari+')');
-                            if(this.in_values[n].type == 'buffer_float')
-                                source = source.replace(regexp, 'buffer_float_data('+name+','+vari+')');
+                            if(this.in_values[key].type == 'float4_fromSampler')
+                                source = source.replace(name+"["+vari+"]", 'texture2D('+name+','+vari+')');
+                            if(this.in_values[key].type == 'float_fromSampler')
+                                source = source.replace(name+"["+vari+"]", 'texture2D('+name+','+vari+').x');
                         }
                     }
                 }
@@ -141,16 +150,15 @@ WebCLGLKernel = function(gl, source, header) {
         var compile = (function() {
             var lines_attrs = (function() {
                 var str = '';
-                for(var n = 0, f = this.in_values.length; n &lt; f; n++) {
-                    if(this.in_values[n].type == 'buffer_float4' || this.in_values[n].type == 'buffer_float') {
-                        str += 'uniform sampler2D '+this.in_values[n].name+';\n';
-                    } else if(this.in_values[n].type == 'float') {
-                        str += 'uniform float '+this.in_values[n].name+';\n';
-                    } else if(this.in_values[n].type == 'float4') {
-                        str += 'uniform vec4 '+this.in_values[n].name+';\n';
-                    } else if(this.in_values[n].type == 'mat4') {
-                        str += 'uniform mat4 '+this.in_values[n].name+';\n';
-                    }
+                for(var key in this.in_values) {
+                    if(this.in_values[key].type == 'float4_fromSampler' || this.in_values[key].type == 'float_fromSampler')
+                        str += 'uniform sampler2D '+key+';\n';
+                    else if(this.in_values[key].type == 'float')
+                        str += 'uniform float '+key+';\n';
+                    else if(this.in_values[key].type == 'float4')
+                        str += 'uniform vec4 '+key+';\n';
+                    else if(this.in_values[key].type == 'mat4')
+                        str += 'uniform mat4 '+key+';\n';
                 }
                 return str;
             }).bind(this);
@@ -162,51 +170,46 @@ WebCLGLKernel = function(gl, source, header) {
                 'varying vec2 global_id;\n'+
 
                 'void main(void) {\n'+
-                'gl_Position = vec4(aVertexPosition, 1.0);\n'+
-                'global_id = aTextureCoord;\n'+
+                    'gl_Position = vec4(aVertexPosition, 1.0);\n'+
+                    'global_id = aTextureCoord;\n'+
                 '}\n';
             var sourceFragment = _precision+
 
                 lines_attrs()+
 
-                    //this.utils.unpackGLSLFunctionString()+
-
                 'varying vec2 global_id;\n'+
                 'uniform float uBufferWidth;'+
-                'uniform float uGeometryLength;'+
-
-                'vec4 buffer_float4_data(sampler2D arg, vec2 coord) {\n'+
-                'vec4 textureColor = texture2D(arg, coord);\n'+
-                'return textureColor;\n'+
-                '}\n'+
-                'float buffer_float_data(sampler2D arg, vec2 coord) {\n'+
-                'vec4 textureColor = texture2D(arg, coord);\n'+
-                'return textureColor.x;\n'+
-                '}\n'+
 
                 'vec2 get_global_id() {\n'+
-                'return global_id;\n'+
+                    'return global_id;\n'+
                 '}\n'+
 
-                'vec2 get_global_id(float id) {\n'+
-                'float num = (id*uGeometryLength)/uBufferWidth;'+
-                'float column = fract(num)*uBufferWidth;'+
-                'float row = floor(num);'+
+                'vec2 get_global_id(float id, float bufferWidth, float geometryLength) {\n'+
+                    'float num = (id*geometryLength)/bufferWidth;'+
+                    'float column = fract(num)*bufferWidth;'+
+                    'float row = floor(num);'+
 
-                'float ts = 1.0/(uBufferWidth-1.0);'+
-                'float xx = column*ts;'+
-                'float yy = row*ts;'+
+                    'float ts = 1.0/(bufferWidth-1.0);'+
 
-                'return vec2(xx, yy);'+
+                    'return vec2(column*ts, row*ts);'+
+                '}\n'+
+
+                'vec2 get_global_id(vec2 id, float bufferWidth) {\n'+
+                    'float column = id.x;'+
+                    'float row = id.y;'+
+
+                    'float ts = 1.0/(bufferWidth-1.0);'+
+
+                    'return vec2(column*ts, row*ts);'+
                 '}\n'+
 
                 _head+
 
                 'void main(void) {\n'+
-                'float out_float = -999.99989;\n'+
-                'vec4 out_float4;\n'+
+                    'float out_float = -999.99989;\n'+
+                    'vec4 out_float4;\n'+
 
-                _source;
+                    _source;
 
 
 
@@ -215,57 +218,68 @@ WebCLGLKernel = function(gl, source, header) {
                 'else gl_FragColor = out_float4;\n'+
                 '}\n';
 
-            this.kernelPrograms = [	new WebCLGLKernelProgram(_gl, sourceVertex, sourceFrag, this.in_values) ];
+
+            //this.kernelPrograms = [	new WebCLGLKernelProgram(_gl, sourceVertex, sourceFrag, this.in_values) ];
+
+            this.kernel = _gl.createProgram();
+            new WebCLGLUtils().createShader(_gl, "WEBCLGL", sourceVertex, sourceFrag, this.kernel);
+            //console.log(sourceF);
+
+
+            this.attr_VertexPos = _gl.getAttribLocation(this.kernel, "aVertexPosition");
+            this.attr_TextureCoord = _gl.getAttribLocation(this.kernel, "aTextureCoord");
+
+            this.uBufferWidth = _gl.getUniformLocation(this.kernel, "uBufferWidth");
+
+            for(var key in this.in_values) {
+                var expectedMode;
+                if(this.in_values[key].type == 'float4_fromSampler' || this.in_values[key].type == 'float_fromSampler')
+                    expectedMode = "SAMPLER";
+                else if(this.in_values[key].type == 'float' || this.in_values[key].type == 'float4' || this.in_values[key].type == 'mat4')
+                    expectedMode = "UNIFORM";
+
+                checkArgNameInitialization(this.in_values, key);
+                this.in_values[key].location = [_gl.getUniformLocation(this.kernel, key)];
+                this.in_values[key].expectedMode = expectedMode;
+            }
 
             return true;
         }).bind(this);
 
 
-        _head =(header!=undefined)?header:'';
-        this.in_values = [];//{value,type,name,idPointer}
-        // value: argument value
-        // type: 'buffer_float4'(RGBA channels), 'buffer_float'(Red channel)
-        // name: argument name
-        // idPointer to: this.samplers or this.uniforms (according to type)
-
         var argumentsSource = source.split(')')[0].split('(')[1].split(','); // "float* A", "float* B", "float C", "float4* D"
         //console.log(argumentsSource);
         for(var n = 0, f = argumentsSource.length; n &lt; f; n++) {
             if(argumentsSource[n].match(/\*/gm) != null) {
-                if(argumentsSource[n].match(/float4/gm) != null) {
-                    this.in_values[n] = {	value:undefined,
-                        type:'buffer_float4',
-                        name:argumentsSource[n].split('*')[1].trim()};
-                } else if(argumentsSource[n].match(/float/gm) != null) {
-                    this.in_values[n] = {	value:undefined,
-                        type:'buffer_float',
-                        name:argumentsSource[n].split('*')[1].trim()};
-                }
-            } else {
-                if(argumentsSource[n].match(/float4/gm) != null) {
-                    this.in_values[n] = {	value:undefined,
-                        type:'float4',
-                        name:argumentsSource[n].split(' ')[1].trim()};
-                } else if(argumentsSource[n].match(/float/gm) != null) {
-                    this.in_values[n] = {	value:undefined,
-                        type:'float',
-                        name:argumentsSource[n].split(' ')[1].trim()};
-                } else if(argumentsSource[n].match(/mat4/gm) != null) {
-                    this.in_values[n] = {	value:undefined,
-                        type:'mat4',
-                        name:argumentsSource[n].split(' ')[1].trim()};
-                }
+                var argName = argumentsSource[n].split('*')[1].trim();
+                checkArgNameInitialization(this.in_values, argName);
+
+                if(argumentsSource[n].match(/float4/gm) != null)
+                    this.in_values[argName].type = 'float4_fromSampler';
+                else if(argumentsSource[n].match(/float/gm) != null)
+                    this.in_values[argName].type = 'float_fromSampler';
+            } else if(argumentsSource[n] != "") {
+                var argName = argumentsSource[n].split(' ')[1].trim();
+                checkArgNameInitialization(this.in_values, argName);
+
+                if(argumentsSource[n].match(/float4/gm) != null)
+                    this.in_values[argName].type = 'float4';
+                else if(argumentsSource[n].match(/float/gm) != null)
+                    this.in_values[argName].type = 'float';
+                else if(argumentsSource[n].match(/mat4/gm) != null)
+                    this.in_values[argName].type = 'mat4';
             }
         }
         //console.log(this.in_values);
 
         // parse header
+        var _head =(header!=undefined)?header:'';
         _head = _head.replace(/\r\n/gi, '').replace(/\r/gi, '').replace(/\n/gi, '');
         _head = parse(_head);
 
         // parse source
         //console.log('original source: '+source);
-        _source = source.replace(/\r\n/gi, '').replace(/\r/gi, '').replace(/\n/gi, '');
+        var _source = source.replace(/\r\n/gi, '').replace(/\r/gi, '').replace(/\n/gi, '');
         _source = _source.replace(/^\w* \w*\([\w\s\*,]*\) {/gi, '').replace(/}(\s|\t)*$/gi, '');
         //console.log('minified source: '+_source);
         _source = parse(_source);
@@ -284,35 +298,10 @@ WebCLGLKernel = function(gl, source, header) {
      * @param {Float|Int|Array&lt;Float4>|Array&lt;Mat4>|WebCLGLBuffer} data
      */
     this.setKernelArg = function(argument, data) {
-        if(data == undefined) alert("Error in setKernelArg("+argument+", data) (this data is undefined)");
-
-        var numArg;
-        if(typeof argument != "string") {
-            numArg = argument;
-        } else {
-            for(var n=0, fn = this.in_values.length; n &lt; fn; n++) {
-                if(this.in_values[n].name == argument) {
-                    numArg = n;
-                    break;
-                }
-            }
-        }
-
-        if(this.in_values[numArg] == undefined) {
-            console.log("argument "+argument+" not exist in this kernel");
-            return;
-        }
-        this.in_values[numArg].value = data;
-
-        for(var n=0, fn = this.kernelPrograms.length; n &lt; fn; n++) {
-            var kp = this.kernelPrograms[n];
-
-            if(this.in_values[numArg].type == 'buffer_float4' || this.in_values[numArg].type == 'buffer_float') {
-                kp.samplers[this.in_values[numArg].idPointer].value = this.in_values[numArg].value;
-            } else if(this.in_values[numArg].type == 'float' || this.in_values[numArg].type == 'float4' || this.in_values[numArg].type == 'mat4') {
-                kp.uniforms[this.in_values[numArg].idPointer].value = this.in_values[numArg].value;
-            }
-        }
+        if(data == undefined) alert("Error in setKernelArg("+argument+", data) (data is undefined)");
+		
+		var arg = (typeof argument == "string") ? argument : Object.keys(this.in_values)[argument];
+        this.in_values[arg].value = data;
     };
 };
 
@@ -341,7 +330,7 @@ WebCLGLKernel = function(gl, source, header) {
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha2</a>
-		on Thu Apr 28 2016 22:31:39 GMT+0200 (CEST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon May 09 2016 19:22:51 GMT+0200 (CEST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
