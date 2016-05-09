@@ -6,7 +6,22 @@ Not 100% the same as the future <a href="https://en.wikipedia.org/wiki/WebCL">We
 - Writing over multiple buffers in a single kernel.<br />
 - Read and write a buffer at same time. (In this case you must create a temporary buffer for the writing and later fix the changes with the webCLGL.copy function)<br />
 
-<h3>Demos</h3>
+<h3>Now only one dependency is required</h3>
+```html
+<script src="/js/WebCLGL.class.js"></script>
+```
+
+<h3>gpufor function now available. Make less to further facilitate the convert of your code for to use in GPU</h3>
+```js
+var arrayResult = gpufor({"float* A": arrayA, "float* B": arrayB}, "n",
+                          "float sum = A[n]+B[n];"+
+                          "return sum;");
+
+```
+<h3>gpufor demo</h3>
+- <a href="https://rawgit.com/stormcolor/webclgl/master/demos/gpufor/index.html"> gpufor basic example A+B</a><br />
+
+<h3>Other specifics demos (whithout use gpufor function)</h3>
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/basic_sum_AB/index.html"> Basic example A+B</a><br />
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/basic_sum_AB_and_number/index.html"> Basic example A+B+num</a><br />
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/benchmarks/index.html"> Benchmarks</a><br />

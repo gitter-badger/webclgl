@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>WebCLGL 2.0 API DOC Source: WebCLGLBuffer.class.js</title>
+	<title>WebCLGL 2.0 API DOC Source: WebCLGLFor.class.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -77,99 +77,62 @@
 					
 
 
-		<h1 class="page-title">Source: WebCLGLBuffer.class.js</h1>
+		<h1 class="page-title">Source: WebCLGLFor.class.js</h1>
     
     <section>
         <article>
-            <pre class="sunlight-highlight-javascript linenums">/** 
-* WebCLGLBuffer Object 
-* @class
-* @constructor
-* @property {Float} length
-*/
-WebCLGLBuffer = function(gl, length, type, offset, linear, mode, splits) {
-    "use strict";
+            <pre class="sunlight-highlight-javascript linenums">/**
+ * gpufor
+ * @class
+ * @param {Object} vars
+ * @param {String} idx
+ * @param {String} code
+ * @return {Array&lt;Float>|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement}
+ */
+var gpufor = function(args, idx, code) {
+    var _webCLGL = new WebCLGL();
+    var _clglWork = _webCLGL.createWork(0);
 
-	this.gl = gl;
-	this.length = (length.constructor === Array) ? [length[0],length[1]] : length;
-	this.type = type;
-	this.offset = offset;
-	this.linear = linear;
-	this.mode = (mode != undefined) ? mode : "SAMPLER"; // "SAMPLER", "ATTRIBUTE", "VERTEX_INDEX"
-	this.splits = (splits != undefined) ? splits : [this.length];
-	
-	this.items = [];
-	var countArr = this.length;
-	var currItem = 0;
-	if(this.length.constructor !== Array) {		
-		while(true) {
-			var spl = (currItem == 0) ? this.splits[currItem] : this.splits[currItem]-this.splits[currItem-1];
-			if(countArr > spl) {
-				this.items[currItem] = new WebCLGLBufferItem(gl, spl, type, offset, linear, mode);
-                this.items[currItem].initialize();
-				countArr -= spl;
-			} else {
-				this.items[currItem] = new WebCLGLBufferItem(gl, countArr, type, offset, linear, mode);
-                this.items[currItem].initialize();
-                countArr -= countArr;
-			}
-			if(countArr &lt;= 0) break;
-			currItem++;
-		}
-	} else {
-		this.items[currItem] = new WebCLGLBufferItem(gl, this.length, type, offset, linear, mode);
-        this.items[currItem].initialize();
+
+
+    var strArgs = "", sep="";
+    for(var key in args)
+        strArgs += sep+key, sep=",";
+
+    var ksrc =   'void main('+strArgs+') {'+
+        'vec2 '+idx+' = get_global_id();'+
+        code.replace("return", "out_float = ")+
+        '}';
+    var kernel = _webCLGL.createKernel();
+    kernel.setKernelSource(ksrc);
+    _clglWork.addKernel(kernel, "result");
+
+
+
+    var buffLength = 0;
+    for(var key in args) {
+        var argVal = args[key];
+
+        _clglWork.setArg(key.split(" ")[1], argVal);
+
+        if(buffLength == 0 &amp;&amp;
+            (argVal instanceof Array || argVal instanceof Float32Array || argVal instanceof Uint8Array || argVal instanceof HTMLImageElement))
+            buffLength = argVal.length;
     }
 
+    _clglWork.setAllowKernelWriting("result");
+    _clglWork.setArg("result", new Float32Array(buffLength));
 
 
-    /**
-     * Write WebGLTexture buffer
-     * @param {Array|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement} array
-     * @param {Bool} [flip=false]
-     */
-    this.writeWebGLTextureBuffer = function(arr, flip) {
-        var m = (this.type == "FLOAT4") ? 4 : 1;
-        for(var i=0; i &lt; this.items.length; i++) {
-            var startItem = (i==0) ? 0 : this.splits[i-1]*m;
-            var endItem = startItem+(this.items[i].length*m);
 
-            if(this.items.length > 1)
-                this.items[i].writeWebGLTextureBuffer(arr.slice(startItem, endItem), flip);
-            else
-                this.items[i].writeWebGLTextureBuffer(arr, flip);
-        }
-    };
+    _clglWork.enqueueNDRangeKernel("result", _clglWork.buffers_TEMP["result"]);
+    _webCLGL.copy(_clglWork.buffers_TEMP["result"], _clglWork.buffers["result"]);
 
-    /**
-     * Write WebGL buffer
-     * @param {Array|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement} array
-     * @param {Bool} [flip=false]
-     */
-    this.writeWebGLBuffer = function(arr, flip) {
-        var m = (this.type == "FLOAT4") ? 4 : 1;
-        for(var i=0; i &lt; this.items.length; i++) {
-            var startItem = (i==0) ? 0 : this.splits[i-1]*m;
-            var endItem = startItem+(this.items[i].length*m);
 
-            if(this.items.length > 1)
-                this.items[i].writeWebGLBuffer(arr.slice(startItem, endItem), flip);
-            else
-                this.items[i].writeWebGLBuffer(arr, flip);
-        }
-    };
 
-    /**
-     * Remove this buffer
-     */
-    this.remove = function() {
-        for(var n=0; n &lt; this.items.length; n++) {
-            this.items[n].remove();
-        }
-    };
-};
-
-</pre>
+    var gpuResult = _webCLGL.enqueueReadBuffer_Float(_clglWork.buffers["result"]);
+    return gpuResult;
+};</pre>
         </article>
     </section>
 

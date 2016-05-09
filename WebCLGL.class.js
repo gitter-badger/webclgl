@@ -21,6 +21,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
  */
+
+var webCLGLDirectory = document.querySelector('script[src$="WebCLGL.class.js"]').getAttribute('src');
+var page = webCLGLDirectory.split('/').pop();
+webCLGLDirectory = webCLGLDirectory.replace('/'+page,"");
+
+var includesF = ['/WebCLGLUtils.class.js',
+    '/WebCLGLBuffer.class.js',
+    '/WebCLGLBufferItem.class.js',
+    '/WebCLGLKernel.class.js',
+    '/WebCLGLVertexFragmentProgram.class.js',
+    '/WebCLGLWork.class.js',
+    '/WebCLGLFor.class.js'];
+for(var n = 0, f = includesF.length; n < f; n++) document.write('<script type="text/javascript" src="'+webCLGLDirectory+includesF[n]+'"></script>');
+
 /**
 * Class for parallelization of calculations using the WebGL context similarly to webcl. This library use floating point texture capabilities (OES_texture_float)
 * @class

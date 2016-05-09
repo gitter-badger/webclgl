@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>WebCLGL 2.0 API DOC Source: WebCLGLBuffer.class.js</title>
+	<title>WebCLGL 2.0 API DOC Class: gpufor</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -71,108 +71,246 @@
 	<div class="row-fluid">
 
 		
-			<div class="span12">
-				
+		<div class="span8">
+			
 				<div id="main">
 					
 
 
-		<h1 class="page-title">Source: WebCLGLBuffer.class.js</h1>
+	<h1 class="page-title">Class: gpufor</h1>
+<section>
+
+<header>
+    <h2>
+    gpufor
+    </h2>
     
-    <section>
-        <article>
-            <pre class="sunlight-highlight-javascript linenums">/** 
-* WebCLGLBuffer Object 
-* @class
-* @constructor
-* @property {Float} length
-*/
-WebCLGLBuffer = function(gl, length, type, offset, linear, mode, splits) {
-    "use strict";
+</header>
 
-	this.gl = gl;
-	this.length = (length.constructor === Array) ? [length[0],length[1]] : length;
-	this.type = type;
-	this.offset = offset;
-	this.linear = linear;
-	this.mode = (mode != undefined) ? mode : "SAMPLER"; // "SAMPLER", "ATTRIBUTE", "VERTEX_INDEX"
-	this.splits = (splits != undefined) ? splits : [this.length];
+<article>
+    <div class="container-overview">
+    
+
+    
+        
+<dt>
+    <h4 class="name" id="gpufor"><span class="type-signature"></span>new gpufor<span class="signature">(vars, idx, code)</span><span class="type-signature"> &rarr; {Array.&lt;Float>|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>gpufor</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
 	
-	this.items = [];
-	var countArr = this.length;
-	var currItem = 0;
-	if(this.length.constructor !== Array) {		
-		while(true) {
-			var spl = (currItem == 0) ? this.splits[currItem] : this.splits[currItem]-this.splits[currItem-1];
-			if(countArr > spl) {
-				this.items[currItem] = new WebCLGLBufferItem(gl, spl, type, offset, linear, mode);
-                this.items[currItem].initialize();
-				countArr -= spl;
-			} else {
-				this.items[currItem] = new WebCLGLBufferItem(gl, countArr, type, offset, linear, mode);
-                this.items[currItem].initialize();
-                countArr -= countArr;
-			}
-			if(countArr &lt;= 0) break;
-			currItem++;
-		}
-	} else {
-		this.items[currItem] = new WebCLGLBufferItem(gl, this.length, type, offset, linear, mode);
-        this.items[currItem].initialize();
-    }
+
+        <tr>
+            
+                <td class="name"><code>vars</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
 
 
+            
+            </td>
 
-    /**
-     * Write WebGLTexture buffer
-     * @param {Array|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement} array
-     * @param {Bool} [flip=false]
-     */
-    this.writeWebGLTextureBuffer = function(arr, flip) {
-        var m = (this.type == "FLOAT4") ? 4 : 1;
-        for(var i=0; i &lt; this.items.length; i++) {
-            var startItem = (i==0) ? 0 : this.splits[i-1]*m;
-            var endItem = startItem+(this.items[i].length*m);
+            
 
-            if(this.items.length > 1)
-                this.items[i].writeWebGLTextureBuffer(arr.slice(startItem, endItem), flip);
-            else
-                this.items[i].writeWebGLTextureBuffer(arr, flip);
-        }
-    };
+            
 
-    /**
-     * Write WebGL buffer
-     * @param {Array|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement} array
-     * @param {Bool} [flip=false]
-     */
-    this.writeWebGLBuffer = function(arr, flip) {
-        var m = (this.type == "FLOAT4") ? 4 : 1;
-        for(var i=0; i &lt; this.items.length; i++) {
-            var startItem = (i==0) ? 0 : this.splits[i-1]*m;
-            var endItem = startItem+(this.items[i].length*m);
+            <td class="description last"></td>
+        </tr>
 
-            if(this.items.length > 1)
-                this.items[i].writeWebGLBuffer(arr.slice(startItem, endItem), flip);
-            else
-                this.items[i].writeWebGLBuffer(arr, flip);
-        }
-    };
+	
 
-    /**
-     * Remove this buffer
-     */
-    this.remove = function() {
-        for(var n=0; n &lt; this.items.length; n++) {
-            this.items[n].remove();
-        }
-    };
-};
+        <tr>
+            
+                <td class="name"><code>idx</code></td>
+            
 
-</pre>
-        </article>
-    </section>
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
 
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>code</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="WebCLGLFor.class.js.html">WebCLGLFor.class.js</a>, <a href="WebCLGLFor.class.js.html#sunlight-1-line-9">line 9</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Array.&lt;Float></span>
+|
+
+<span class="param-type">Float32Array</span>
+|
+
+<span class="param-type">Uint8Array</span>
+|
+
+<span class="param-type">WebGLTexture</span>
+|
+
+<span class="param-type">HTMLImageElement</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+	
+    
+
+	
+    
+
+    
+</article>
+
+</section>
 
 
 
@@ -198,6 +336,10 @@ WebCLGLBuffer = function(gl, length, type, offset, linear, mode, splits) {
 				</footer>
 			</div>
 
+			
+			<div class="span3">
+				<div id="toc"></div>
+			</div>
 			
 			<br clear="both">
 		</div>
