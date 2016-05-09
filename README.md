@@ -12,7 +12,6 @@ Not 100% the same as the future <a href="https://en.wikipedia.org/wiki/WebCL">We
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/benchmarks/index.html"> Benchmarks</a><br />
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/using_vectors/index.html"> Using vectors</a><br />
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/using_vectors_as_output/index.html"> Using vectors as output</a><br />
-- <a href="https://rawgit.com/stormcolor/webclgl/master/demos/compare_values_with_other_ids/index.html"> Compare values with other ids</a><br />
 
 <h3>Other advanced demos</h3>
 - <a href="#"> Handling several WebCLGLKernels with WebCLGLWork class</a> (coming soon)<br />
@@ -23,3 +22,25 @@ Not 100% the same as the future <a href="https://en.wikipedia.org/wiki/WebCL">We
 <h3><a href="http://www.khronos.org/files/webgl/webgl-reference-card-1_0.pdf">OpenGL ES Shading Language 1.0 Reference Card (Pag 3-4)</a></h3>
 <br />
 <br />
+<h3>ChangeLog</h3>
+<h4>v3.0</h4>
+- Changed *kernel in VertexFragmentPrograms(VFP) to *attr for indicate arguments of type "attributes". <br />
+*attr in vertex programs of VFP only allow get the same/current ID value (type attribute): <br />
+main(float4*attr nodeVertexCoord) { <br />
+    vec4 nvc = nodeVertexCoord[]; <br />
+} <br />
+* in vertex programs of VFP allow to get another ID (type sampler2D) (for to get a node data or a texture data) <br />
+main(float4* nodePosition) { <br />
+    vec2 x = get_global_id(ID, bufferWidth, geometryLength); <br />
+    vec4 np = nodePosition[x]; <br />
+} <br />
+(arguments type sampler2D (no attribute) allow be writed by a kernel program) <br />
+ <br />
+ <br />
+Deleted optional geometryLength argument in enqueueNDRangeKernel & enqueueVertexFragmentProgram. It is indicated through glsl code with next available methods: <br />
+- get_global_id(ID, bufferWidth, geometryLength) (in Kernels & vertex of VFP) (The last get_global_id(ID) is removed) <br />
+- get_global_id(vec2(row, col), bufferWidth) (in Kernels & fragment of VFP)function  Available <br />
+- get_global_id() (only in Kernels fot to get) <br />
+ <br />
+Changed method setUpdateFromKernel to setAllowKernelWriting in WebCLGLWork <br />
+

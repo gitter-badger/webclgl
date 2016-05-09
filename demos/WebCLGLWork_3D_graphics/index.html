@@ -11,7 +11,6 @@
 	<script src="../../WebCLGLBuffer.class.js"></script>
 	<script src="../../WebCLGLBufferItem.class.js"></script>
 	<script src="../../WebCLGLKernel.class.js"></script>
-	<script src="../../WebCLGLKernelProgram.class.js"></script>
 	<script src="../../WebCLGLVertexFragmentProgram.class.js"></script>
 	<script src="../../WebCLGLWork.class.js"></script>
 	<script src="../../WebCLGL.class.js"></script>
@@ -25,6 +24,7 @@
 		var utils = new WebCLGLUtils();
 		var gl = utils.getWebGLContextFromCanvas(document.getElementById("graph"));
 		var offset = 100.0;
+		var geometryLength = 24;
 		var box = loadBox();
 
 		var arrPP = [];
@@ -48,20 +48,20 @@
 				['varying vec4 vVertexColor; '],
 
 				// vertex source
-				['void main(float4*kernel posXYZW,'+ // *kernel for make update in vertex from lasts kernel
-							'float* nodeId,'+
-							'float4* nodeVertexPos,'+
-							'float4* nodeVertexCol,'+
+				['void main(float4* posXYZW,'+ // *kernel for make update in vertex from lasts kernel
+							'float*attr nodeId,'+
+							'float4*attr nodeVertexPos,'+
+							'float4*attr nodeVertexCol,'+
 							'mat4 PMatrix,'+
 							'mat4 cameraWMatrix,'+
 							'mat4 nodeWMatrix,'+
 							'float nodesSize) {'+
-					'vec2 x = get_global_id();'+
-          			'vec2 xx = get_global_id(nodeId[x]);'+
+
+          			'vec2 xx = get_global_id(nodeId[], uBufferWidth, '+geometryLength.toFixed(1)+');'+
 
 					'vec4 nodePosition = posXYZW[xx];\n'+
-					'vec4 nodeVertexPosition = nodeVertexPos[x];\n'+
-					'vec4 nodeVertexColor = nodeVertexCol[x];\n'+
+					'vec4 nodeVertexPosition = nodeVertexPos[];\n'+
+					'vec4 nodeVertexColor = nodeVertexCol[];\n'+
 
 					'mat4 nodepos = nodeWMatrix;'+
 					'nodepos[3][0] = nodePosition.x;'+
@@ -78,7 +78,6 @@
 
 				// fragment source
 				['void main(float nodesSize) {'+
-					'vec2 x = get_global_id();'+
 					'gl_FragColor = vVertexColor;\n'+
 				 '}']];
 
@@ -203,7 +202,7 @@
 			updatePP(clglWork);
 
       		clglWork.setArg("nodeId", arrayNodeId);
-            clglWork.setUpdateFromKernel("posXYZW");
+            clglWork.setAllowKernelWriting("posXYZW");
 			clglWork.setArg("posXYZW", arrayNodePosXYZW);
 			clglWork.setArg("nodeVertexPos", arrayNodeVertexPos);
 			clglWork.setArg("nodeVertexCol", arrayNodeVertexColor);
@@ -214,7 +213,7 @@
 			for(var n=0; n < arrayNodePosXYZW.length/4; n++) {
 				arrayNodeDir.push(x, y, z, 255);
 			}
-            clglWork.setUpdateFromKernel("dir");
+            clglWork.setAllowKernelWriting("dir");
 			clglWork.setArg("dir", arrayNodeDir);
 
 
@@ -290,7 +289,7 @@
 			                              0.0, 0.0, 1.0, 0.0,
 			                              0.0, 0.0, 0.0, 1.0])));
 			clglWork.setArg("nodesSize", 30);
-			clglWork.enqueueVertexFragmentProgram("posXYZW", "vertexFragmentProgram1", gl.TRIANGLES, 24);
+			clglWork.enqueueVertexFragmentProgram("posXYZW", "vertexFragmentProgram1", gl.TRIANGLES);
 		};
 
 		</script>
