@@ -8,7 +8,7 @@ Not 100% the same as the future <a href="https://en.wikipedia.org/wiki/WebCL">We
 
 <h3>Now only one dependency is required</h3>
 ```html
-<script src="/path/to/js/WebCLGL.class.js"></script>
+<script src="/js/WebCLGL.class.js"></script>
 ```
 
 <h3>gpufor function now available. Make less to further facilitate the convert of your code for to use in GPU</h3>
