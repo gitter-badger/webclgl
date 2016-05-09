@@ -20,7 +20,7 @@ var arrayResult = gpufor({"float* A": arrayA, "float* B": arrayB}, "n",
 ```
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/gpufor/index.html"> gpufor basic example A+B</a><br />
 
-<h3>Other specifics demos (whithout use gpufor function)</h3>
+<h3>Other specifics demos (without use gpufor function)</h3>
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/basic_sum_AB/index.html"> Basic example A+B</a><br />
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/basic_sum_AB_and_number/index.html"> Basic example A+B+num</a><br />
 - <a href="https://rawgit.com/stormcolor/webclgl/master/demos/benchmarks/index.html"> Benchmarks</a><br />
