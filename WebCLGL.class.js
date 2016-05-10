@@ -45,6 +45,7 @@ var WebCLGL = function(webglcontext) {
     "use strict";
 
 	this.utils = new WebCLGLUtils();
+    var _webCLGLWorks = [];
 
 	// WEBGL CONTEXT
 	var _gl;
@@ -159,6 +160,14 @@ var WebCLGL = function(webglcontext) {
 	this.sampler_copyTexture_toSave = _gl.getUniformLocation(this.shader_copyTexture, "sampler_toSave");
 
     /**
+     * getContext
+     * @returns {WebGLRenderingContext}
+     */
+    this.getContext = function() {
+        return _gl;
+    };
+
+    /**
      * Copy one WebCLGLBuffer|WebGLTexture to another WebCLGLBuffer|WebGLTexture.
      * @param {WebCLGLBuffer|WebGLTexture} valueToRead The buffer to read.
      * @param {WebCLGLBuffer|WebGLTexture} valueToWrite The buffer to write.
@@ -257,7 +266,16 @@ var WebCLGL = function(webglcontext) {
      */
     this.createWork = function(offset) {
         var webclglWork = new WebCLGLWork(this, offset);
+        _webCLGLWorks.push(webclglWork);
         return webclglWork;
+    };
+
+    /**
+     * getWorks
+     * @returns {Array<WebCLGLWork>}
+     */
+    this.getWorks = function() {
+        return _webCLGLWorks;
     };
 
     /**
