@@ -294,7 +294,7 @@ WebCLGLWork = function(webCLGL, offset) {
      * Process VertexFragmentProgram
      * @param {String} [argument=undefined] Argument for vertices count or undefined if indices exist
      * @param {String} Name (vertexFragmentProgramName) of vertexFragmentProgram to execute
-     * @param {Int} drawMode
+     * @param {Int} drawMode 0=POINTS, 3=LINE_STRIP, 2=LINE_LOOP, 1=LINES, 5=TRIANGLE_STRIP, 6=TRIANGLE_FAN and 4=TRIANGLES
      */
     this.enqueueVertexFragmentProgram = function(argument, vertexFragmentProgramName, drawMode) {
         var buff = (this.CLGL_bufferIndices != undefined) ? this.CLGL_bufferIndices : this.buffers[argument];
