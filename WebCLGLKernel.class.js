@@ -32,7 +32,7 @@ WebCLGLKernel = function(gl, source, header) {
      * Update the kernel source
      * @type Void
      * @param {String} source
-     * @param {String} header Additional functions
+     * @param {String} [header=undefined] Additional functions
      */
     this.setKernelSource = function(source, header) {
         /**
