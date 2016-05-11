@@ -1,5 +1,7 @@
 webclgl
 =======
+
+[![Join the chat at https://gitter.im/stormcolor/webclgl](https://badges.gitter.im/stormcolor/webclgl.svg)](https://gitter.im/stormcolor/webclgl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 <h2>Javascript Library for general purpose computing on GPU, aka GPGPU.</h2>
 WebCLGL use WebGL specification for interpreter the code.<br />
 
