@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>WebCLGL 2.0 API DOC Class: WebCLGLKernel</title>
+	<title>WebCLGL 2.0 API DOC Global</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -107,12 +107,12 @@
 					
 
 
-	<h1 class="page-title">Class: WebCLGLKernel</h1>
+	<h1 class="page-title">Global</h1>
 <section>
 
 <header>
     <h2>
-    WebCLGLKernel
+    
     </h2>
     
 </header>
@@ -123,8 +123,62 @@
 
     
         
+
+        
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+	
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+			
+				
 <dt>
-    <h4 class="name" id="WebCLGLKernel"><span class="type-signature"></span>new WebCLGLKernel<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getCtx"><span class="type-signature"></span>getCtx<span class="signature">()</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -132,7 +186,7 @@
     
     
     <div class="description">
-        <p>WebCLGLKernel Object</p>
+        <p>getCtx</p>
     </div>
     
 
@@ -165,7 +219,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGLKernel.class.js.html">WebCLGLKernel.class.js</a>, <a href="WebCLGLKernel.class.js.html#sunlight-1-line-6">line 6</a>
+        <a href="WebCLGLFor.class.js.html">WebCLGLFor.class.js</a>, <a href="WebCLGLFor.class.js.html#sunlight-1-line-220">line 220</a>
     </li></ul></dd>
     
 
@@ -190,30 +244,12 @@
     
 </dd>
 
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-	
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
+			
+        
 			
 				
 <dt>
-    <h4 class="name" id="setKernelArg"><span class="type-signature"></span>setKernelArg<span class="signature">(argument, data)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="gpufor"><span class="type-signature"></span>gpufor<span class="signature">(vars, program, program)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -221,7 +257,7 @@
     
     
     <div class="description">
-        <p>Bind float or a WebCLGLBuffer to a kernel argument</p>
+        <p>gpuforG</p>
     </div>
     
 
@@ -255,51 +291,13 @@
 
         <tr>
             
-                <td class="name"><code>argument</code></td>
+                <td class="name"><code></code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Int</span>
-|
-
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Id of argument or name of this</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Float</span>
-|
-
-<span class="param-type">Int</span>
-|
-
-<span class="param-type">Array.&lt;Float4></span>
-|
-
-<span class="param-type">Array.&lt;Mat4></span>
-|
-
-<span class="param-type"><a href="WebCLGLBuffer.html">WebCLGLBuffer</a></span>
+<span class="param-type">HTMLCanvasElement</span>
 
 
             
@@ -310,6 +308,75 @@
             
 
             <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>vars</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>program</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Kernel program</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>program</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Kernel program || Graphic program</p></td>
         </tr>
 
 	
@@ -341,7 +408,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGLKernel.class.js.html">WebCLGLKernel.class.js</a>, <a href="WebCLGLKernel.class.js.html#sunlight-1-line-221">line 221</a>
+        <a href="WebCLGLFor.class.js.html">WebCLGLFor.class.js</a>, <a href="WebCLGLFor.class.js.html#sunlight-1-line-16">line 16</a>
     </li></ul></dd>
     
 
@@ -371,7 +438,7 @@
 			
 				
 <dt>
-    <h4 class="name" id="setKernelSource"><span class="type-signature"></span>setKernelSource<span class="signature">(source, <span class="optional">header</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="processGraphic"><span class="type-signature"></span>processGraphic<span class="signature">(<span class="optional">argument</span>, <span class="optional">drawMode</span>)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -379,7 +446,7 @@
     
     
     <div class="description">
-        <p>Update the kernel source</p>
+        <p>processGraphic</p>
     </div>
     
 
@@ -417,42 +484,7 @@
 
         <tr>
             
-                <td class="name"><code>source</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>header</code></td>
+                <td class="name"><code>argument</code></td>
             
 
             <td class="type">
@@ -484,7 +516,46 @@
                 </td>
             
 
-            <td class="description last"><p>Additional functions</p></td>
+            <td class="description last"><p>Argument for vertices count or undefined if indices exist</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>drawMode</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last"><p>0=POINTS, 3=LINE_STRIP, 2=LINE_LOOP, 1=LINES, 5=TRIANGLE_STRIP, 6=TRIANGLE_FAN and 4=TRIANGLES</p></td>
         </tr>
 
 	
@@ -516,7 +587,353 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WebCLGLKernel.class.js.html">WebCLGLKernel.class.js</a>, <a href="WebCLGLKernel.class.js.html#sunlight-1-line-37">line 37</a>
+        <a href="WebCLGLFor.class.js.html">WebCLGLFor.class.js</a>, <a href="WebCLGLFor.class.js.html#sunlight-1-line-254">line 254</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+			
+        
+			
+				
+<dt>
+    <h4 class="name" id="processKernels"><span class="type-signature"></span>processKernels<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>processKernels</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="WebCLGLFor.class.js.html">WebCLGLFor.class.js</a>, <a href="WebCLGLFor.class.js.html#sunlight-1-line-227">line 227</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+			
+        
+			
+				
+<dt>
+    <h4 class="name" id="setArg"><span class="type-signature"></span>setArg<span class="signature">(argName, value)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>setArg</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>argName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;Float></span>
+|
+
+<span class="param-type">Float32Array</span>
+|
+
+<span class="param-type">Uint8Array</span>
+|
+
+<span class="param-type">WebGLTexture</span>
+|
+
+<span class="param-type">HTMLImageElement</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="WebCLGLFor.class.js.html">WebCLGLFor.class.js</a>, <a href="WebCLGLFor.class.js.html#sunlight-1-line-245">line 245</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+			
+        
+			
+				
+<dt>
+    <h4 class="name" id="update"><span class="type-signature"></span>update<span class="signature">(argName)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>update</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>argName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="WebCLGLFor.class.js.html">WebCLGLFor.class.js</a>, <a href="WebCLGLFor.class.js.html#sunlight-1-line-236">line 236</a>
     </li></ul></dd>
     
 
@@ -547,6 +964,14 @@
 		
 		
 		
+			
+        
+			
+        
+			
+        
+			
+        
 			
         
 			
