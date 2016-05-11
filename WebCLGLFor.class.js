@@ -1,6 +1,7 @@
 /**
  * gpufor
  * @class
+ * @constructor
  */
 var gpufor = function() {
     var _webCLGL;
