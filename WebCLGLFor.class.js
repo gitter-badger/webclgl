@@ -1,17 +1,6 @@
 /**
  * gpufor
  * @class
- * @param {Object} vars - vars for this Kernel program
- * @param {String} idx - idx name to used for indexing
- * @param {String} code - the code
- * @return {Array<Float>|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement}
- */
-/**
- * gpuforG
- * @param {HTMLCanvasElement}
- * @param {Object} vars
- * @param {Array} program - Kernel program
- * @param {Array} program - Kernel program || Graphic program
  */
 var gpufor = function() {
     var _webCLGL;
