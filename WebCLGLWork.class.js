@@ -164,10 +164,14 @@ WebCLGLWork = function(webCLGL, offset) {
      * @param {Array<Float>|Float32Array|Uint8Array|WebGLTexture|HTMLImageElement} value
      * @param {Array<Float>} [splits=[value.length]]
      * @param {Array<Float2>} [overrideDimensions=new Array(){Math.sqrt(value.length), Math.sqrt(value.length)}]
+     * @param {String} [overrideType="FLOAT4"] - force "FLOAT4" or "FLOAT"
      * @returns {WebCLGLBuffer}
      */
-    this.setArg = function(argument, value, splits, overrideDimensions) {
+    this.setArg = function(argument, value, splits, overrideDimensions, overrideType) {
         this.checkArg(argument, value);
+
+        if(overrideType != undefined)
+            type = overrideType;
 
         if(isBuffer == true) {
             var mode = "SAMPLER"; // "ATTRIBUTE", "SAMPLER", "UNIFORM"
