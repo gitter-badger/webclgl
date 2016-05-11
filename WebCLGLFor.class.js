@@ -20,17 +20,29 @@ var gpufor = function() {
     /** @private  */
     var ini = (function() {
         var arguments = arguments[0];
-        var args = arguments[0];
-        var idx = arguments[1];
-        var code = arguments[2];
+        var args;
+        var idx;
+        var typOut;
+        var code;
+        if(arguments.length > 3) {
+            args = arguments[0];
+            idx = arguments[1];
+            typOut = arguments[2];
+            code = arguments[3];
+        } else {
+            args = arguments[0];
+            idx = arguments[1];
+            typOut = "FLOAT";
+            code = arguments[2];
+        }
 
         var strArgs = "", sep="";
         for(var key in args)
             strArgs += sep+key, sep=",";
 
         var ksrc =   'void main('+strArgs+') {'+
-            'vec2 '+idx+' = get_global_id();'+
-            code.replace("return", "out_float = ")+
+                'vec2 '+idx+' = get_global_id();'+
+                code.replace("return", ((typOut=="FLOAT")?"out_float":"out_float4")+" = ")+
             '}';
         var kernel = _webCLGL.createKernel();
         kernel.setKernelSource(ksrc);
@@ -49,7 +61,7 @@ var gpufor = function() {
         }
 
         //_clglWork.setAllowKernelWriting("result");
-        _clglWork.setArg("result", new Float32Array(buffLength));
+        _clglWork.setArg("result", new Float32Array(buffLength), null, null, typOut);
 
 
         //_clglWork.enqueueNDRangeKernel("result", _clglWork.buffers_TEMP["result"]);
@@ -57,9 +69,10 @@ var gpufor = function() {
 
         _clglWork.enqueueNDRangeKernel("result", _clglWork.buffers["result"]);
 
-
-        var gpuResult = _webCLGL.enqueueReadBuffer_Float(_clglWork.buffers["result"]);
-        return gpuResult;
+        if(typOut=="FLOAT")
+            return _webCLGL.enqueueReadBuffer_Float(_clglWork.buffers["result"]);
+        else
+            return _webCLGL.enqueueReadBuffer_Float4(_clglWork.buffers["result"]);
     }).bind(this);
 
     /** @private  */
@@ -70,35 +83,68 @@ var gpufor = function() {
         // kernels
         for(var i = 2; i < arguments.length-1; i++) {
             var K = arguments[i];
-            var idx = K[0];
-            var outArg = K[1];
-            var kH = K[2];
-            var kS = K[3];
 
-            _clglWork.setAllowKernelWriting(outArg);
-
-            var typ;
+            var idx;
+            var outArg;
             var argsInThisKernel = {};
-            var strArgs = "", sep="";
+            var typOut;
+            var kH;
+            var kS;
+
+            if(K.length == 1) {
+                idx = "n";
+                outArg = K[0].match(new RegExp(/(([a-z|A-Z])| )*/gm))[0].trim();
+                var rightVar = K[0].match(new RegExp(/=(([a-z|A-Z])| )*$/gm))[0].replace("=","").trim();
+                var operation = K[0].match(new RegExp(/([^a-z|^A-Z])+/gm))[0].trim();
+                kH = "";
+                kS ='vec4 current = '+outArg+'['+idx+'];\n'+
+                    'current '+operation+' '+rightVar+'['+idx+'];\n'+
+                    'return current;\n';
+
+                for(var key in args) {
+                    var expl = key.split(" ");
+
+                    if(expl[1] == outArg)
+                        argsInThisKernel[key] = true;
+
+                    if(expl[1] == rightVar)
+                        argsInThisKernel[key] = true;
+                }
+            } else {
+                idx = K[0];
+                outArg = K[1];
+                kH = K[2];
+                kS = K[3];
+
+                for(var key in args) {
+                    var expl = key.split(" ");
+
+                    // search arguments in use
+                    var matches = kS.match(new RegExp(expl[1], "gm"));
+                    if(key != "indices" && matches != null && matches.length > 0)
+                        argsInThisKernel[key] = true;
+                }
+            }
+
+            // set output type float|float4
             for(var key in args) {
                 var expl = key.split(" ");
 
                 if(expl[1] == outArg) {
-                    typ = expl[0].match(new RegExp("float4", "gm"));
-                    typ = (typ != null && typ.length > 0) ? "out_float4 = " : "out_float = ";
+                    typOut = expl[0].match(new RegExp("float4", "gm"));
+                    typOut = (typOut != null && typOut.length > 0) ? "out_float4 = " : "out_float = ";
                 }
-
-                var matches = kS.match(new RegExp(expl[1], "gm"));
-                if(key != "indices" && matches != null && matches.length > 0)
-                    argsInThisKernel[key] = true;
             }
+            _clglWork.setAllowKernelWriting(outArg);
+
+            var strArgs = "", sep="";
             for(var key in argsInThisKernel)
                 strArgs += sep+key, sep=",";
 
             kS = 'void main('+strArgs+') {'+
-                        'vec2 '+idx+' = get_global_id();'+
-                        kS.replace("return", typ)+
-                    '}';
+                    'vec2 '+idx+' = get_global_id();'+
+                    kS.replace("return", typOut)+
+                '}';
             var kernel = _webCLGL.createKernel();
             kernel.setKernelSource(kS, kH);
             _clglWork.addKernel(kernel, outArg);
@@ -115,6 +161,7 @@ var gpufor = function() {
             var argsInThisVFP_v = {};
             var strArgs_v = "", sep="";
             for(var key in args) {
+                // search arguments in use
                 var matches = VFP_vertexS.match(new RegExp(key.split(" ")[1], "gm"));
                 if(key != "indices" && matches != null && matches.length > 0)
                     argsInThisVFP_v[key] = true;
@@ -125,6 +172,7 @@ var gpufor = function() {
             var argsInThisVFP_f = {};
             var strArgs_f = "", sep="";
             for(var key in args) {
+                // search arguments in use
                 matches = VFP_fragmentS.match(new RegExp(key.split(" ")[1], "gm"));
                 if(key != "indices" && matches != null && matches.length > 0)
                     argsInThisVFP_f[key] = true;
@@ -162,7 +210,7 @@ var gpufor = function() {
         iniG(arguments);
     } else {
         _webCLGL = new WebCLGL();
-        _clglWork = _webCLGL.createWork(0);
+        _clglWork = _webCLGL.createWork(window.gpufor_precision|0);
         return ini(arguments);
     }
 
